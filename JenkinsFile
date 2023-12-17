@@ -22,7 +22,7 @@ pipeline {
         
         stage ('Running unit tests'){
                 steps {
-                sh "pytest utest.py"
+                bat "pytest utest.py"
                 }
         }
     }
