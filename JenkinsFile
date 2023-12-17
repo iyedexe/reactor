@@ -1,17 +1,12 @@
 
 pipeline {
-    agent {
-            node {
-                label "my-local-suer"
-                customWorkspace "C:/projects"
-            }
-        }
+    agent any
     stages {
         stage('Checkout project') {
             steps {
                 script {
                     git branch: "master",
-                        credentialsId: 'my-credentials',
+                        credentialsId: 'github_iyede_wsl_key',
                         url: 'git@github.com:iyedexe/reactor.git'
                 }
             }
