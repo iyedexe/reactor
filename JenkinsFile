@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     git branch: "master",
-                        credentialsId: 'github_iyede_wsl_key',
+                        credentialsId: 'win_ssh_iyede',
                         url: 'git@github.com:iyedexe/reactor.git'
                 }
             }
