@@ -1,0 +1,29 @@
+
+pipeline {
+    agent {
+            node {
+                label "my-local-suer"
+                customWorkspace "C:/projects"
+            }
+        }
+    stages {
+        stage('Checkout project') {
+            steps {
+                script {
+                    git branch: "master",
+                        credentialsId: 'my-credentials',
+                        url: 'git@github.com:iyedexe/reactor.git'
+                }
+            }
+        }
+
+        stage('Installing packages') {
+            steps {
+                script {
+                    sh 'pip install -r requirements.txt'
+                }
+            }
+        }
+    }
+
+}
