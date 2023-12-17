@@ -2,7 +2,9 @@ from datetime import datetime
 import asyncio
 import random
 import datetime;
- 
+
+MAX_ALIVE_TIME = -1
+
 def generate_random_market_data():
     ct = datetime.datetime.now()
     ts = ct.timestamp()
@@ -10,19 +12,21 @@ def generate_random_market_data():
     ask = bid + (50-bid)*random.random()
     return bid, ask, ts    
 
+async def produce_frame(writer):
+    bid, ask, timestamp = generate_random_market_data()
+    for way in [0,1]:
+        message = [bid if way==0 else ask, way, timestamp]
+        message_str = "["+";".join([str(elem) for elem in message])+"]"
+        writer.write(message_str.encode())
+        await writer.drain()
+    print(f'[PRODUCER] bid={bid}, ask={ask}, timestamp={timestamp}')
+    
 async def produce(reader, writer):
     print('[PRODUCER] Open the connection')
-    run=True
     interval=5
-
+    run = True
     while run:
-        bid, ask, timestamp = generate_random_market_data()
-        for way in [0,1]:
-            message = [bid if way==0 else ask, way, timestamp]
-            message_str = "["+";".join([str(elem) for elem in message])+"]"
-            writer.write(message_str.encode())
-            await writer.drain()
-        print(f'[PRODUCER] bid={bid}, ask={ask}, timestamp={timestamp}')
+        produce_frame(writer)
         await asyncio.sleep(interval)
 
     print('[PRODUCER] Close the connection')
