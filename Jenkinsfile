@@ -25,6 +25,11 @@ pipeline {
                     bat "pytest"
                 }
         }
+        stage ('Deploying'){
+                steps {
+                    bat "pip install ."
+                }
+        }
     }
 
 }
