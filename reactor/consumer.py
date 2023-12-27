@@ -2,8 +2,8 @@ import asyncio
 import threading
 import numpy as np
 
-from producer import DataEncoder
-from producer import MarketDataTick
+from .producer import DataEncoder
+from .producer import MarketDataTick
 #cosume qui pique la data et submit dans un worker le process
 #layer listen
 #encodage possible : 4 premiers octets pour donner la taille du message/ fixee ou variable.
