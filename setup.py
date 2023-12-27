@@ -10,8 +10,7 @@ setup(
     license='BSD 2-clause',
     packages=['reactor'],
     install_requires=['asyncio',
-                      'numpy',
-                      'threading'                     
+                      'numpy'                     
                       ],
 
     classifiers=[
