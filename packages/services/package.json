@@ -1,0 +1,20 @@
+{
+  "name": "@avis/services",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@avis/adapters": "workspace:*",
+    "@avis/core": "workspace:*",
+    "@avis/db": "workspace:*",
+    "@opentelemetry/api": "^1.9.1",
+    "pg-boss": "^12.36.0"
+  }
+}

@@ -1,0 +1,26 @@
+# SITE_ADDRESS is either your domain (public VPS: automatic HTTPS via Let's Encrypt)
+# or ":80" (behind a Cloudflare Tunnel, which terminates TLS at Cloudflare).
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	reverse_proxy web:3000 {
+		health_uri /api/health
+		health_interval 30s
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

@@ -1,0 +1,959 @@
+// AvisBoost data model.
+//
+// Tenancy rule: every tenant-owned table carries `organizationId` directly (even child tables),
+// so the data-access layer can scope every query the same way. Only `packages/db` may import
+// the generated client; everything else goes through `forTenant()` or the audited `system` API.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── Auth (Better Auth core + admin + organization plugins) ─────────────────────────────
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  // admin plugin: "admin" = platform admin, "user" = everyone else
+  role          String?   @default("user")
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  phone         String?
+  locale        String    @default("fr")
+
+  sessions    Session[]
+  accounts    Account[]
+  members     Member[]
+  invitations Invitation[]
+
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ───────────────────────────── Tenancy ─────────────────────────────
+
+enum ServiceState {
+  ACTIVE // everything runs
+  SUSPENDED // subscription canceled/unpaid: campaigns, replies and syncs paused
+  TERMINATED // grace period over: smart links deactivated
+}
+
+model Organization {
+  id           String       @id
+  name         String
+  slug         String       @unique
+  logo         String?
+  metadata     String?
+  createdAt    DateTime     @default(now())
+  // AvisBoost fields
+  onboardedAt  DateTime?
+  serviceState ServiceState @default(ACTIVE)
+  timezone     String       @default("Europe/Paris")
+  locale       String       @default("fr")
+  billingEmail String?
+
+  members      Member[]
+  invitations  Invitation[]
+  locations    Location[]
+  subscription Subscription?
+
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String // "owner" | "staff"
+  createdAt      DateTime     @default(now())
+
+  notificationPref NotificationPref?
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
+}
+
+model NotificationPref {
+  id             String  @id @default(cuid())
+  organizationId String
+  memberId       String  @unique
+  member         Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  alertEmail     Boolean @default(true)
+  alertSms       Boolean @default(false)
+  alertPhone     String?
+  monthlyReport  Boolean @default(true)
+
+  @@index([organizationId])
+  @@map("notification_pref")
+}
+
+// ───────────────────────────── Locations & metrics ─────────────────────────────
+
+enum LocationStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Location {
+  id                String         @id @default(cuid())
+  organizationId    String
+  organization      Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name              String
+  address           String?
+  city              String?
+  postalCode        String?
+  category          String // e.g. "restaurant", "hair_salon", "car_repair", "medical_clinic"
+  latitude          Float?
+  longitude         Float?
+  timezone          String         @default("Europe/Paris")
+  brandColor        String         @default("#2563eb")
+  logoFileId        String?
+  gbpAccountId      String?
+  gbpLocationId     String?        @unique
+  placeId           String?
+  googleReviewUrl   String?
+  /// As last reported by Google during sync (source of the "current rating" KPI).
+  googleRating      Float?
+  googleReviewCount Int?
+  status            LocationStatus @default(ACTIVE)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  baseline       BaselineSnapshot?
+  dailyStats     LocationDailyStat[]
+  reviews        Review[]
+  syncState      ReviewSyncState?
+  replySettings  ReplySettings?
+  stands         Stand[]
+  contacts       Contact[]
+  campaigns      Campaign[]
+  competitors    Competitor[]
+  feedbacks      PrivateFeedback[]
+  reviewRequests ReviewRequest[]
+
+  @@index([organizationId])
+  @@map("location")
+}
+
+/// Captured once at onboarding: the "before" side of "Impact since you joined".
+model BaselineSnapshot {
+  id               String   @id @default(cuid())
+  organizationId   String
+  locationId       String   @unique
+  location         Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  capturedAt       DateTime
+  rating           Float
+  reviewCount      Int
+  velocityPerWeek  Float // reviews/week over the 12 weeks before onboarding
+  responseRate     Float // 0..1
+  avgResponseHours Float?
+
+  @@index([organizationId])
+  @@map("baseline_snapshot")
+}
+
+/// Nightly rollup per location and day; the dashboard charts read from here.
+model LocationDailyStat {
+  id                String   @id @default(cuid())
+  organizationId    String
+  locationId        String
+  location          Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  date              DateTime @db.Date
+  rating            Float? // Google-reported average at end of day
+  totalReviews      Int
+  newReviews        Int      @default(0)
+  ratingSum         Int      @default(0) // sum of stars of reviews created that day
+  repliedReviews    Int      @default(0) // reviews created that day that have a reply (as of rollup)
+  responseHoursSum  Float    @default(0)
+  scans             Int      @default(0)
+  googleClicks      Int      @default(0)
+  feedbacks         Int      @default(0)
+  messagesSent      Int      @default(0)
+  messageClicks     Int      @default(0)
+  attributedReviews Int      @default(0)
+
+  @@unique([locationId, date])
+  @@index([organizationId, date])
+  @@map("location_daily_stat")
+}
+
+// ───────────────────────────── Smart links ─────────────────────────────
+
+enum StandStatus {
+  UNASSIGNED
+  ACTIVE
+  INACTIVE
+}
+
+model Stand {
+  id             String      @id @default(cuid())
+  code           String      @unique // short code used in /r/{code}
+  organizationId String? // null while in stock
+  locationId     String?
+  location       Location?   @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  label          String? // e.g. "Comptoir", "Table 4"
+  status         StandStatus @default(UNASSIGNED)
+  assignedAt     DateTime?
+  deactivatedAt  DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  events    LinkEvent[]
+  feedbacks PrivateFeedback[]
+
+  @@index([organizationId])
+  @@map("stand")
+}
+
+enum LinkEventType {
+  SCAN // landing page opened from a stand
+  MESSAGE_CLICK // landing page opened from an email/SMS link
+  GOOGLE_CLICK // "Leave a Google review" pressed
+  FEEDBACK_OPEN // "Send private feedback" pressed
+  FEEDBACK_SENT
+}
+
+enum LinkSource {
+  NFC
+  QR
+  MESSAGE
+  UNKNOWN
+}
+
+enum DeviceType {
+  MOBILE
+  TABLET
+  DESKTOP
+  OTHER
+}
+
+model LinkEvent {
+  id              String        @id @default(cuid())
+  organizationId  String
+  locationId      String
+  standId         String?
+  stand           Stand?        @relation(fields: [standId], references: [id], onDelete: SetNull)
+  reviewRequestId String?
+  type            LinkEventType
+  source          LinkSource    @default(UNKNOWN)
+  deviceType      DeviceType    @default(OTHER)
+  os              String?
+  visitorHash     String? // salted, rotated daily: dedupe without storing IPs
+  occurredAt      DateTime      @default(now())
+
+  @@index([organizationId, occurredAt])
+  @@index([locationId, occurredAt])
+  @@index([standId, occurredAt])
+  @@map("link_event")
+}
+
+enum FeedbackStatus {
+  NEW
+  READ
+  ARCHIVED
+}
+
+model PrivateFeedback {
+  id              String         @id @default(cuid())
+  organizationId  String
+  locationId      String
+  location        Location       @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  standId         String?
+  stand           Stand?         @relation(fields: [standId], references: [id], onDelete: SetNull)
+  reviewRequestId String?
+  message         String
+  contactName     String?
+  contactEmail    String?
+  contactPhone    String?
+  wantsReply      Boolean        @default(false)
+  status          FeedbackStatus @default(NEW)
+  createdAt       DateTime       @default(now())
+
+  @@index([organizationId, createdAt])
+  @@map("private_feedback")
+}
+
+// ───────────────────────────── Reviews & replies ─────────────────────────────
+
+enum ReplyState {
+  UNANSWERED
+  DRAFTED
+  PENDING_APPROVAL
+  ANSWERED
+}
+
+model Review {
+  id              String     @id @default(cuid())
+  organizationId  String
+  locationId      String
+  location        Location   @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  googleReviewId  String
+  authorName      String
+  authorPhotoUrl  String?
+  rating          Int // 1..5
+  comment         String?
+  language        String?
+  createdAtGoogle DateTime
+  updatedAtGoogle DateTime
+  removedAt       DateTime? // disappeared from Google during sync
+  sentiment       Float? // -1..1
+  topics          String[]   @default([])
+  replyState      ReplyState @default(UNANSWERED)
+  firstRepliedAt  DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  replies        ReviewReply[]
+  classification ReviewClassification?
+  violation      ViolationReport?
+
+  @@unique([locationId, googleReviewId])
+  @@index([organizationId, createdAtGoogle])
+  @@index([locationId, createdAtGoogle])
+  @@map("review")
+}
+
+model ReviewSyncState {
+  id             String    @id @default(cuid())
+  organizationId String
+  locationId     String    @unique
+  location       Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  lastSyncedAt   DateTime?
+  lastSuccessAt  DateTime?
+  lastError      String?
+  reviewsSeen    Int       @default(0)
+
+  @@index([organizationId])
+  @@map("review_sync_state")
+}
+
+enum ReplyTone {
+  WARM
+  FORMAL
+  SHORT
+}
+
+model ReplySettings {
+  id                  String    @id @default(cuid())
+  organizationId      String
+  locationId          String    @unique
+  location            Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  enabled             Boolean   @default(true)
+  tone                ReplyTone @default(WARM)
+  signature           String?
+  alwaysMention       String[]  @default([])
+  neverMention        String[]  @default([])
+  autoPublishMinStars Int       @default(4) // replies to reviews >= this many stars are published automatically
+  autoPublishAll      Boolean   @default(false)
+  updatedAt           DateTime  @updatedAt
+
+  @@index([organizationId])
+  @@map("reply_settings")
+}
+
+enum ReplyStatus {
+  DRAFT
+  PENDING_APPROVAL
+  PUBLISHED
+  FAILED
+  DISCARDED
+}
+
+enum ReplyOrigin {
+  AI
+  HUMAN
+  EXTERNAL // reply found on Google that was not written through AvisBoost
+}
+
+model ReviewReply {
+  id             String      @id @default(cuid())
+  organizationId String
+  reviewId       String
+  review         Review      @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  body           String
+  status         ReplyStatus
+  origin         ReplyOrigin
+  guardrailFlags String[]    @default([])
+  model          String?
+  promptVersion  String?
+  publishedAt    DateTime?
+  publishedById  String? // user id; null + PUBLISHED = published automatically by the system
+  error          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  revisions ReplyRevision[]
+
+  @@index([organizationId, status])
+  @@index([reviewId])
+  @@map("review_reply")
+}
+
+enum ReplyAction {
+  GENERATED
+  EDITED
+  APPROVED
+  PUBLISHED
+  PUBLISH_FAILED
+  DISCARDED
+  SYNCED // observed on Google
+}
+
+/// Append-only history of every reply change, with who did it.
+model ReplyRevision {
+  id             String      @id @default(cuid())
+  organizationId String
+  replyId        String
+  reply          ReviewReply @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  action         ReplyAction
+  body           String
+  actorUserId    String? // null = system
+  impersonatorId String?
+  createdAt      DateTime    @default(now())
+
+  @@index([replyId])
+  @@index([organizationId])
+  @@map("reply_revision")
+}
+
+enum PolicyCategory {
+  NONE
+  SPAM_FAKE
+  OFF_TOPIC
+  CONFLICT_OF_INTEREST
+  OFFENSIVE
+  HARASSMENT
+  PERSONAL_INFO
+  IMPERSONATION
+}
+
+model ReviewClassification {
+  id             String         @id @default(cuid())
+  organizationId String
+  reviewId       String         @unique
+  review         Review         @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  category       PolicyCategory
+  confidence     Float // 0..1
+  explanation    String
+  model          String?
+  promptVersion  String?
+  createdAt      DateTime       @default(now())
+
+  @@index([organizationId])
+  @@map("review_classification")
+}
+
+enum ViolationStatus {
+  TO_SUBMIT
+  SUBMITTED
+  REMOVED
+  REJECTED
+  DISMISSED
+}
+
+model ViolationReport {
+  id             String          @id @default(cuid())
+  organizationId String
+  reviewId       String          @unique
+  review         Review          @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  category       PolicyCategory
+  reasonText     String
+  explanation    String
+  status         ViolationStatus @default(TO_SUBMIT)
+  submittedAt    DateTime?
+  submittedById  String?
+  resolvedAt     DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([organizationId, status])
+  @@map("violation_report")
+}
+
+// ───────────────────────────── Contacts & campaigns ─────────────────────────────
+
+enum Channel {
+  EMAIL
+  SMS
+}
+
+enum ContactSource {
+  MANUAL
+  CSV
+  WEBHOOK
+}
+
+model Contact {
+  id             String        @id @default(cuid())
+  organizationId String
+  locationId     String
+  location       Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  firstName      String
+  lastName       String?
+  email          String? // normalized lowercase
+  phone          String? // E.164
+  source         ContactSource
+  externalId     String?
+  lastVisitAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  consents ConsentEvent[]
+  requests ReviewRequest[]
+
+  @@unique([organizationId, email])
+  @@unique([organizationId, phone])
+  @@index([locationId])
+  @@map("contact")
+}
+
+enum ConsentAction {
+  GRANTED
+  WITHDRAWN
+}
+
+/// Append-only consent log; the latest event per (contact, channel) is the effective state.
+model ConsentEvent {
+  id             String        @id @default(cuid())
+  organizationId String
+  contactId      String
+  contact        Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  channel        Channel
+  action         ConsentAction
+  source         String // "manual:<userId>", "csv:<importId>", "webhook:<id>", "unsubscribe-link", "sms-stop"
+  evidence       String? // e.g. wording shown at collection time
+  createdAt      DateTime      @default(now())
+
+  @@index([contactId, channel, createdAt])
+  @@index([organizationId])
+  @@map("consent_event")
+}
+
+enum SuppressionReason {
+  UNSUBSCRIBE
+  STOP
+  BOUNCE
+  COMPLAINT
+  MANUAL
+}
+
+/// Opt-out list keyed by a keyed hash of the address, so opt-outs survive contact deletion (GDPR erasure).
+model Suppression {
+  id             String            @id @default(cuid())
+  organizationId String
+  channel        Channel
+  valueHash      String
+  reason         SuppressionReason
+  createdAt      DateTime          @default(now())
+
+  @@unique([organizationId, channel, valueHash])
+  @@map("suppression")
+}
+
+enum TemplateKind {
+  REQUEST
+  REMINDER
+}
+
+model MessageTemplate {
+  id             String       @id @default(cuid())
+  organizationId String? // null = system default
+  channel        Channel
+  kind           TemplateKind
+  locale         String       @default("fr")
+  name           String
+  subject        String?
+  body           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@map("message_template")
+}
+
+enum CampaignStatus {
+  ACTIVE
+  PAUSED
+  STOPPED
+}
+
+model Campaign {
+  id                   String         @id @default(cuid())
+  organizationId       String
+  locationId           String
+  location             Location       @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  name                 String
+  channels             Channel[]
+  emailTemplateId      String?
+  smsTemplateId        String?
+  reminderEnabled      Boolean        @default(true)
+  delayAfterVisitHours Int            @default(2)
+  reminderAfterDays    Int            @default(3)
+  status               CampaignStatus @default(ACTIVE)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  requests ReviewRequest[]
+
+  @@index([organizationId])
+  @@map("campaign")
+}
+
+enum ReviewRequestStatus {
+  SCHEDULED
+  SENT
+  REMINDED
+  CLICKED
+  SKIPPED // no consent / suppressed / service suspended
+  FAILED
+}
+
+enum AttributionMethod {
+  NAME_MATCH
+  TIME_WINDOW
+}
+
+/// One per contact per location: the unique constraint enforces "max one request + one reminder".
+model ReviewRequest {
+  id                  String              @id @default(cuid())
+  organizationId      String
+  locationId          String
+  location            Location            @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  contactId           String
+  contact             Contact             @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  campaignId          String?
+  campaign            Campaign?           @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  token               String              @unique // used in /m/{token}
+  channel             Channel
+  visitAt             DateTime?
+  scheduledAt         DateTime
+  status              ReviewRequestStatus @default(SCHEDULED)
+  skipReason          String?
+  sentAt              DateTime?
+  reminderScheduledAt DateTime?
+  remindedAt          DateTime?
+  clickedAt           DateTime?
+  attributedReviewId  String?             @unique
+  attribution         AttributionMethod?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  messages Message[]
+
+  @@unique([contactId, locationId])
+  @@index([organizationId, status, scheduledAt])
+  @@map("review_request")
+}
+
+enum MessageKind {
+  REQUEST
+  REMINDER
+  ALERT
+  REPORT
+  TRANSACTIONAL
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+}
+
+model Message {
+  id                String         @id @default(cuid())
+  organizationId    String?
+  channel           Channel
+  kind              MessageKind
+  to                String
+  subject           String?
+  body              String
+  provider          String
+  providerMessageId String?
+  status            MessageStatus  @default(QUEUED)
+  error             String?
+  reviewRequestId   String?
+  reviewRequest     ReviewRequest? @relation(fields: [reviewRequestId], references: [id], onDelete: SetNull)
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  createdAt         DateTime       @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([providerMessageId])
+  @@map("message")
+}
+
+/// Inbound webhook for booking tools (one per location); authenticated by a bearer token stored hashed.
+model InboundWebhook {
+  id             String    @id @default(cuid())
+  organizationId String
+  locationId     String
+  name           String
+  tokenHash      String    @unique
+  lastUsedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([organizationId])
+  @@map("inbound_webhook")
+}
+
+// ───────────────────────────── Competitors ─────────────────────────────
+
+model Competitor {
+  id             String   @id @default(cuid())
+  organizationId String
+  locationId     String
+  location       Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  placeId        String
+  name           String
+  category       String?
+  distanceM      Int?
+  tracked        Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  snapshots CompetitorSnapshot[]
+
+  @@unique([locationId, placeId])
+  @@index([organizationId])
+  @@map("competitor")
+}
+
+model CompetitorSnapshot {
+  id             String     @id @default(cuid())
+  organizationId String
+  competitorId   String
+  competitor     Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  date           DateTime   @db.Date
+  rating         Float
+  reviewCount    Int
+
+  @@unique([competitorId, date])
+  @@index([organizationId])
+  @@map("competitor_snapshot")
+}
+
+// ───────────────────────────── Billing ─────────────────────────────
+
+enum PlanCode {
+  ESSENTIEL
+  PRO
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  UNPAID
+  CANCELED
+  INCOMPLETE
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique
+  organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan                 PlanCode
+  status               SubscriptionStatus
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  trialEndsAt          DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  canceledAt           DateTime?
+  graceEndsAt          DateTime?
+  setupFeePaidAt       DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@map("subscription")
+}
+
+model StripeEvent {
+  id          String   @id // Stripe event id, for idempotency
+  type        String
+  processedAt DateTime @default(now())
+
+  @@map("stripe_event")
+}
+
+// ───────────────────────────── Files, reports, audit ─────────────────────────────
+
+enum FileKind {
+  LOGO
+  REPORT
+  QR_SHEET
+  IMPORT
+}
+
+model StoredFile {
+  id             String   @id @default(cuid())
+  organizationId String?
+  kind           FileKind
+  storageKey     String   @unique
+  filename       String
+  mime           String
+  size           Int
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+  @@map("stored_file")
+}
+
+enum ReportStatus {
+  PENDING
+  READY
+  SENT
+  FAILED
+}
+
+model MonthlyReport {
+  id             String       @id @default(cuid())
+  organizationId String
+  locationId     String? // null = all locations
+  month          DateTime     @db.Date // first day of the month
+  fileId         String?
+  status         ReportStatus @default(PENDING)
+  error          String?
+  emailedAt      DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, locationId, month])
+  @@map("monthly_report")
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?
+  actorUserId    String?
+  impersonatorId String?
+  action         String // e.g. "stand.reassign", "reply.publish", "admin.impersonate.start"
+  entity         String?
+  entityId       String?
+  data           Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@map("audit_log")
+}
+
+// ───────────────────────────── Mock Google backends (used only when GOOGLE_MODE=mock) ─────────────────────────────
+
+model MockGbpLocation {
+  gbpLocationId String   @id
+  accountId     String
+  title         String
+  placeId       String
+  createdAt     DateTime @default(now())
+
+  @@map("mock_gbp_location")
+}
+
+model MockGbpReview {
+  id              String    @id @default(cuid())
+  gbpLocationId   String
+  reviewId        String    @unique
+  reviewerName    String
+  reviewerPhoto   String?
+  starRating      Int
+  comment         String?
+  createTime      DateTime
+  updateTime      DateTime
+  replyComment    String?
+  replyUpdateTime DateTime?
+  deleted         Boolean   @default(false)
+
+  @@index([gbpLocationId, updateTime])
+  @@map("mock_gbp_review")
+}
+
+model MockPlace {
+  placeId         String   @id
+  name            String
+  category        String
+  address         String?
+  latitude        Float
+  longitude       Float
+  rating          Float
+  userRatingCount Int
+  updatedAt       DateTime @updatedAt
+
+  @@map("mock_place")
+}

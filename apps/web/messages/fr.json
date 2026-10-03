@@ -1,0 +1,79 @@
+{
+  "common": {
+    "appName": "AvisBoost",
+    "loading": "Chargement…",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "back": "Retour",
+    "allLocations": "Tous les établissements",
+    "error": "Une erreur est survenue. Réessayez dans un instant.",
+    "language": "Langue",
+    "languages": { "fr": "Français", "en": "English" }
+  },
+  "auth": {
+    "title": "Connexion",
+    "subtitle": "Accédez à votre espace AvisBoost",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "tabPassword": "Mot de passe",
+    "tabMagic": "Lien par e-mail",
+    "magicHelp": "Recevez un lien de connexion à usage unique, valable 15 minutes.",
+    "sendMagic": "Recevoir le lien",
+    "magicSent": "Si un compte existe pour {email}, un lien de connexion vient d'être envoyé.",
+    "forgot": "Mot de passe oublié ?",
+    "forgotSent": "Si un compte existe pour {email}, un e-mail de réinitialisation vient d'être envoyé.",
+    "invalid": "E-mail ou mot de passe incorrect.",
+    "noOrganization": "Votre compte n'est rattaché à aucun établissement. Contactez le support.",
+    "signOut": "Se déconnecter",
+    "resetTitle": "Choisir un nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe (10 caractères minimum)",
+    "resetDone": "Mot de passe mis à jour. Vous pouvez vous connecter.",
+    "resetInvalid": "Ce lien n'est plus valable. Demandez-en un nouveau."
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "reviews": "Avis",
+    "feedback": "Messages privés",
+    "campaigns": "Campagnes",
+    "stands": "Supports NFC/QR",
+    "competitors": "Concurrents",
+    "reports": "Rapports",
+    "settings": "Paramètres",
+    "admin": "Administration",
+    "clients": "Clients"
+  },
+  "impersonation": {
+    "banner": "Vous êtes connecté en tant que {name} (support).",
+    "stop": "Revenir à l'administration"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bonjour {name}",
+    "currentRating": "Note actuelle",
+    "totalReviews": "Avis au total",
+    "locations": "Établissements",
+    "syncedAt": "Dernière synchronisation : {date}",
+    "neverSynced": "Jamais synchronisé",
+    "phaseNote": "Le tableau de bord complet arrive à l'étape 2."
+  },
+  "admin": {
+    "title": "Clients",
+    "subtitle": "{count, plural, one {# client} other {# clients}}",
+    "name": "Client",
+    "locations": "Établissements",
+    "plan": "Formule",
+    "status": "Abonnement",
+    "service": "Service",
+    "since": "Client depuis"
+  },
+  "serviceState": { "ACTIVE": "Actif", "SUSPENDED": "Suspendu", "TERMINATED": "Résilié" },
+  "subscriptionStatus": {
+    "TRIALING": "Essai",
+    "ACTIVE": "Actif",
+    "PAST_DUE": "Impayé",
+    "UNPAID": "Impayé",
+    "CANCELED": "Résilié",
+    "INCOMPLETE": "Incomplet"
+  }
+}

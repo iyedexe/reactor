@@ -1,0 +1,16 @@
+**/node_modules
+**/.next
+**/dist
+**/coverage
+**/*.tsbuildinfo
+packages/db/src/generated
+.env
+.env.*
+!.env.example
+storage
+backups
+test-results
+playwright-report
+.git
+reactor
+*.py

@@ -1,0 +1,11 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - prisma
+  - esbuild
+  - sharp
+  - unrs-resolver
+# Peers are declared explicitly where needed; auto-installing them drags Next/Prisma CLI into prod images.
+autoInstallPeers: false

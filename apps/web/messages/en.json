@@ -1,0 +1,79 @@
+{
+  "common": {
+    "appName": "AvisBoost",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "allLocations": "All locations",
+    "error": "Something went wrong. Please try again.",
+    "language": "Language",
+    "languages": { "fr": "Français", "en": "English" }
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Access your AvisBoost account",
+    "email": "Email address",
+    "password": "Password",
+    "signIn": "Sign in",
+    "tabPassword": "Password",
+    "tabMagic": "Email link",
+    "magicHelp": "Get a single-use sign-in link, valid for 15 minutes.",
+    "sendMagic": "Send me a link",
+    "magicSent": "If an account exists for {email}, a sign-in link has been sent.",
+    "forgot": "Forgot your password?",
+    "forgotSent": "If an account exists for {email}, a reset email has been sent.",
+    "invalid": "Incorrect email or password.",
+    "noOrganization": "Your account is not linked to any business. Please contact support.",
+    "signOut": "Sign out",
+    "resetTitle": "Choose a new password",
+    "newPassword": "New password (10 characters minimum)",
+    "resetDone": "Password updated. You can now sign in.",
+    "resetInvalid": "This link has expired. Please request a new one."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "reviews": "Reviews",
+    "feedback": "Private feedback",
+    "campaigns": "Campaigns",
+    "stands": "NFC/QR stands",
+    "competitors": "Competitors",
+    "reports": "Reports",
+    "settings": "Settings",
+    "admin": "Admin",
+    "clients": "Clients"
+  },
+  "impersonation": {
+    "banner": "You are signed in as {name} (support).",
+    "stop": "Back to admin"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Hello {name}",
+    "currentRating": "Current rating",
+    "totalReviews": "Total reviews",
+    "locations": "Locations",
+    "syncedAt": "Last sync: {date}",
+    "neverSynced": "Never synced",
+    "phaseNote": "The full dashboard arrives in phase 2."
+  },
+  "admin": {
+    "title": "Clients",
+    "subtitle": "{count, plural, one {# client} other {# clients}}",
+    "name": "Client",
+    "locations": "Locations",
+    "plan": "Plan",
+    "status": "Subscription",
+    "service": "Service",
+    "since": "Client since"
+  },
+  "serviceState": { "ACTIVE": "Active", "SUSPENDED": "Suspended", "TERMINATED": "Terminated" },
+  "subscriptionStatus": {
+    "TRIALING": "Trial",
+    "ACTIVE": "Active",
+    "PAST_DUE": "Past due",
+    "UNPAID": "Unpaid",
+    "CANCELED": "Canceled",
+    "INCOMPLETE": "Incomplete"
+  }
+}

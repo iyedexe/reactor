@@ -1,0 +1,97 @@
+# AvisBoost production stack.
+#   docker compose up -d                       # public VPS: Caddy gets HTTPS certificates itself
+#   docker compose --profile tunnel up -d      # home server behind a Cloudflare Tunnel
+# Configuration lives in .env (see .env.example). Images are built locally or pulled from REGISTRY.
+
+x-app: &app
+  env_file: .env
+  restart: unless-stopped
+  depends_on:
+    postgres: { condition: service_healthy }
+    migrate: { condition: service_completed_successfully }
+  environment: &app-env
+    NODE_ENV: production
+    APP_URL: ${APP_URL:?set APP_URL}
+    DATABASE_URL: postgresql://${POSTGRES_USER:-avisboost}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-avisboost}
+    STORAGE_LOCAL_PATH: /data/storage
+  volumes:
+    - storage:/data/storage
+  logging: &logging
+    driver: json-file
+    options: { max-size: "20m", max-file: "5" }
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-avisboost}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-avisboost}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    shm_size: 256mb
+    logging: *logging
+
+  # One-shot: applies pending Prisma migrations, then exits. web/worker wait for it.
+  migrate:
+    image: ${REGISTRY:-avisboost}/migrate:${TAG:-latest}
+    build: { context: ., target: migrate }
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avisboost}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-avisboost}
+    depends_on:
+      postgres: { condition: service_healthy }
+    logging: *logging
+
+  web:
+    <<: *app
+    image: ${REGISTRY:-avisboost}/web:${TAG:-latest}
+    build: { context: ., target: web }
+    expose: ["3000"]
+
+  worker:
+    <<: *app
+    image: ${REGISTRY:-avisboost}/worker:${TAG:-latest}
+    build: { context: ., target: worker }
+    expose: ["3001"]
+    stop_grace_period: 30s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS (your domain, or :80 behind a Cloudflare Tunnel)}
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web: { condition: service_healthy }
+    logging: *logging
+
+  # Home-server mode: outbound-only tunnel to Cloudflare, no open ports needed.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on: [caddy]
+    logging: *logging
+
+volumes:
+  pgdata:
+  storage:
+  caddy_data:
+  caddy_config:

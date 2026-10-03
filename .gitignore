@@ -1,3 +1,17 @@
 __pycache__
 build
 reactor.egg-info
+# --- AvisBoost (Node workspace) ---
+node_modules
+.next
+dist
+coverage
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+packages/db/src/generated
+storage/
+backups/
+test-results
+playwright-report
