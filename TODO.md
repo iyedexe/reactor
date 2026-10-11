@@ -71,15 +71,21 @@ Phases follow the agreed build order. After each phase: summary + "what you need
 - [ ] Respect `serviceState` (no publishing when suspended)
 - [ ] Tests: reply rules, guardrails, idempotent publish, mock adapter
 
-## Phase 5 — E-mail/SMS review requests
+## Phase 5 — E-mail/SMS review requests ✅
 
-- [ ] Contacts: manual add, CSV import (with consent column + evidence), booking webhook (`InboundWebhook`, bearer token)
-- [ ] Consent log + suppression list checked **at send time**; opt-out links (`List-Unsubscribe`, one-click) and SMS STOP handling
-- [ ] Templates editor with variables (`{{prenom}}`, `{{entreprise}}`, `{{lien_avis}}`), no incentive wording
-- [ ] Scheduler: delay after visit, quiet hours (SMS 9:00–20:00 Mon–Sat, nothing on Sunday, French public holidays (?)), 1 request + 1 reminder max
-- [ ] Brevo adapter (e-mail + SMS + delivery webhooks); Twilio adapter for SMS
-- [ ] Tracking: sent, delivered, clicked, attributed review (name match / time window)
-- [ ] Tests: consent/opt-out, quiet hours (DST!), max-one-reminder, attribution
+- [x] Contacts: manual add (explicit consent + evidence), CSV import (`;`/`,`, French dates, per-row or declared consent, line report), booking-tool webhook (bearer token stored hashed)
+- [x] Consent log (append-only) + suppression list (keyed hashes, survives GDPR erasure), both re-checked **at send time**
+- [x] Opt-out in every message: e-mail footer link + `List-Unsubscribe` / one-click POST (RFC 8058); SMS "STOP : link"; `/u/{token}` page; SMS "STOP" replies and hard bounces/complaints via Brevo webhook
+- [x] Templates: per-organization editor with live checks (required link, no incentive, no sentiment gating, unknown variables), preview, SMS length/segments
+- [x] Scheduler: delay after visit, quiet hours (SMS 9–20 h, e-mail 8–21 h, Mon–Sat, no French public holidays), DST-safe; 1 request + 1 reminder max (DB unique + claim-before-send); no reminder after a click
+- [x] Same message for every customer; channel choice is SMS-if-consented else e-mail, nothing else
+- [x] Brevo adapter (`/v3/smtp/email`, `/v3/transactionalSMS/send`), Twilio SMS adapter, per-channel provider routing
+- [x] Tracking: sent, delivered, clicked, attributed review (name match / time window), shown on the dashboard
+- [x] Worker: dispatch every 5 min, attribution hourly
+- [x] Tests: quiet hours/holidays/DST, template rules, consent/opt-out, max one reminder, attribution, CSV, webhooks, Brevo payloads, e2e
+- [ ] Verify Brevo webhook payloads (especially SMS replies) against your Brevo account and adjust `parseBrevoEvent` if needed
+- [ ] Brevo sender domain authentication (SPF/DKIM/DMARC) — configuration on your side
+- [ ] Twilio delivery status callbacks (not wired; Twilio is send-only for now)
 
 ## Phase 6 — Alerts & policy flagging
 

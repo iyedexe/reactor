@@ -10,6 +10,8 @@ export const JOBS = {
   mockGenerateReviews: "mock.generate-reviews",
   competitorsAll: "competitors.refresh-all",
   competitorsLocation: "competitors.refresh",
+  dispatchRequests: "requests.dispatch",
+  attribution: "requests.attribution",
 } as const;
 
 export interface JobData {
@@ -21,6 +23,8 @@ export interface JobData {
   [JOBS.mockGenerateReviews]: Record<string, never>;
   [JOBS.competitorsAll]: Record<string, never>;
   [JOBS.competitorsLocation]: { organizationId: string; locationId: string };
+  [JOBS.dispatchRequests]: Record<string, never>;
+  [JOBS.attribution]: Record<string, never>;
 }
 
 export type JobName = (typeof JOBS)[keyof typeof JOBS];

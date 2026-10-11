@@ -45,7 +45,8 @@
     "reports": "Reports",
     "settings": "Settings",
     "admin": "Admin",
-    "clients": "Clients"
+    "clients": "Clients",
+    "contacts": "Contacts"
   },
   "impersonation": {
     "banner": "You are signed in as {name} (support).",
@@ -282,5 +283,147 @@
       "UNASSIGNED": "Unassigned"
     },
     "policy": "The page always offers two equivalent choices: leave a Google review or send a private message. Google forbids filtering reviews by customer satisfaction."
+  },
+  "campaigns": {
+    "title": "Review request campaigns",
+    "subtitle": "An SMS or e-mail sent after each visit, with at most one reminder.",
+    "rules": "Rules applied automatically: every customer gets the same message (no filtering by satisfaction), no incentive, consent required, opt-out in every message, no SMS before 9:00 or after 20:00, nothing on Sundays or public holidays, one request and one reminder max per customer.",
+    "stats30": "Last 30 days: {sent} sent · {clicked} opened · {reviews} estimated reviews",
+    "none": "No campaigns.",
+    "form": {
+      "name": "Name",
+      "status": "Status",
+      "statuses": {
+        "ACTIVE": "Active",
+        "PAUSED": "Paused"
+      },
+      "channels": "Channels",
+      "channelsHint": "SMS is used when the customer agreed to it, otherwise e-mail.",
+      "delay": "Delay after the visit (hours)",
+      "delayHint": "Automatically adjusted to allowed hours.",
+      "reminder": "Reminder if not clicked",
+      "reminderDays": "days after sending",
+      "save": "Save",
+      "saved": "Campaign saved."
+    },
+    "templates": {
+      "title": "Messages",
+      "subtitle": "Customize your request texts. Messages that break Google's rules are refused.",
+      "custom": "Custom",
+      "default": "Default",
+      "subject": "Subject",
+      "body": "Message",
+      "variables": "Variables: {vars} (the link is required). The opt-out line is added automatically.",
+      "preview": "Preview",
+      "save": "Save",
+      "saved": "Message saved.",
+      "reset": "Back to the default message",
+      "segments": "{length} characters · {segments, plural, one {# SMS} other {# SMS}} ({encoding})",
+      "SMS": {
+        "REQUEST": "SMS – review request",
+        "REMINDER": "SMS – reminder"
+      },
+      "EMAIL": {
+        "REQUEST": "E-mail – review request",
+        "REMINDER": "E-mail – reminder"
+      }
+    },
+    "webhooks": {
+      "title": "Booking software",
+      "subtitle": "Your booking tool (Planity, Zenchef, TheFork…) can send us every visit automatically.",
+      "lastUsed": "last call on {date}",
+      "neverUsed": "never used",
+      "delete": "Delete",
+      "tokenOnce": "Copy this token now: it won't be shown again.",
+      "namePlaceholder": "Name (e.g. Planity)",
+      "create": "Create a connection",
+      "payloadTitle": "Expected format (JSON)"
+    }
+  },
+  "contacts": {
+    "title": "Customers",
+    "subtitle": "{count, plural, =0 {No customers} one {# customer} other {# customers}}",
+    "search": "Search (name, e-mail, phone)",
+    "location": "Location",
+    "empty": "No customers.",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}",
+    "add": {
+      "title": "Add a customer",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Mobile phone",
+      "email": "E-mail",
+      "consent": "Customer consent",
+      "consentSms": "Agrees to receive an SMS",
+      "consentEmail": "Agrees to receive an e-mail",
+      "evidence": "Consent evidence",
+      "defaultEvidence": "Agreed at the counter",
+      "evidenceHint": "How consent was collected (kept for GDPR).",
+      "submit": "Add and schedule the request",
+      "result": {
+        "scheduled": "Customer added, request scheduled.",
+        "exists": "Customer updated (a request already exists).",
+        "skipped": "Customer added, no request ({reason}).",
+        "none": "Customer added."
+      }
+    },
+    "import": {
+      "title": "Import a CSV file",
+      "file": "CSV file",
+      "columns": "Recognized columns: prenom, nom, telephone, email, date_visite, consentement_sms, consentement_email (oui/non).",
+      "consent": "If the file has no consent column",
+      "consentSms": "These customers agreed to SMS",
+      "consentEmail": "These customers agreed to e-mails",
+      "evidencePlaceholder": "How consent was collected (required)",
+      "submit": "Import {file}",
+      "importing": "Importing…",
+      "report": "{total} rows · {created} created · {updated} updated · {scheduled} requests scheduled",
+      "lineError": "Line {line}: {reason}"
+    },
+    "table": {
+      "name": "Customer",
+      "contact": "Contact details",
+      "consent": "Consent",
+      "request": "Review request",
+      "source": "Source"
+    },
+    "request": {
+      "none": "–",
+      "reviewed": "Review posted ✓",
+      "scheduled": "Scheduled for {date}",
+      "skipped": "Not sent ({reason})",
+      "SENT": "Sent",
+      "REMINDED": "Reminded",
+      "CLICKED": "Link opened",
+      "FAILED": "Sending failed",
+      "SCHEDULED": "Scheduled",
+      "SKIPPED": "Not sent"
+    },
+    "skipReasons": {
+      "no_consent": "no consent",
+      "opted_out": "opted out",
+      "service_suspended": "service suspended",
+      "campaign_inactive": "campaign paused",
+      "too_old": "visit too old",
+      "no_destination": "no contact detail",
+      "reminder_disabled": "reminder disabled",
+      "send_error": "sending error",
+      "other": "other"
+    },
+    "sources": {
+      "MANUAL": "Manual",
+      "CSV": "Import",
+      "WEBHOOK": "Booking"
+    },
+    "actions": {
+      "optOutSms": "Opt out SMS",
+      "optOutEmail": "Opt out e-mail",
+      "optedOut": "Opt-out recorded.",
+      "delete": "Delete",
+      "confirmDelete": "Permanently delete this customer and their history? Any opt-out will still be honored.",
+      "deleted": "Customer deleted."
+    }
   }
 }

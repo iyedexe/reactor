@@ -35,12 +35,17 @@
 	}
 }
 
-# Optional short links domain (LINKS_SITE_ADDRESS, e.g. avb.fr). Everything else redirects to the app.
+# Optional short links domain (LINKS_SITE_ADDRESS, e.g. avb.fr).
 {$LINKS_SITE_ADDRESS} {
 	import common
 	@links path /r/* /m/*
 	handle @links {
 		reverse_proxy links:3002
+	}
+	# Opt-out links printed in SMS/e-mails use the short domain too; they are served by the web app.
+	@unsubscribe path /u/* /api/unsubscribe/* /_next/*
+	handle @unsubscribe {
+		reverse_proxy web:3000
 	}
 	handle {
 		respond "Not found" 404

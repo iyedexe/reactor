@@ -1,6 +1,6 @@
 # AvisBoost — Project handoff
 
-_Last updated: 2026-10-11 · End of phase 1 of 9_
+_Last updated: 2026-10-12 · Phases 1, 2, 3 and 5 done_
 
 ## 1. Where things are
 
@@ -8,7 +8,7 @@ _Last updated: 2026-10-11 · End of phase 1 of 9_
 |---|---|
 | Repository | `github.com/iyedexe/reactor` |
 | Branch | `avisboost` (phase 1). `master` still holds the old Python project and is untouched. |
-| Status | Phase 1 (foundation) complete and verified. Phases 2–12 not started. |
+| Status | Phases 1 (foundation), 2 (dashboard), 3 (smart links) and 5 (e-mail/SMS requests) done and verified. Phases 4, 6–12 not started. |
 | Scope | Google reviews + Google listing visibility (local SEO). **No client websites.** |
 | Plan & checklists | [`TODO.md`](TODO.md) |
 | How to work on it | [`docs/WORKFLOW.md`](docs/WORKFLOW.md) |
@@ -29,7 +29,15 @@ No pull request has been opened yet. Merge `avisboost` into `master` (or open a 
 - Worker syncs reviews from the mock Google every 15 min (full scan nightly), tags new reviews (language,
   sentiment, topics, policy category), recomputes daily stats, captures the onboarding baseline.
 - Demo data for 3 businesses with 12 months of history (logins in the README).
-- The dashboard page is a **phase-1 placeholder** (rating, review count, locations). The real dashboard is phase 2.
+- Client dashboard: KPIs with trends, "since you joined" impact, charts, funnels, per stand/campaign tables,
+  competitor benchmark; reviews list with filters; private feedback inbox.
+- Smart links: `/r/{code}` landing page (two equal choices, never gated), private feedback form, stand stock
+  management in the admin (assign/reassign/deactivate, QR sheet, NFC CSV), client "Supports" page.
+- Review requests: contacts (manual / CSV / booking webhook) with consent log, templates with policy checks,
+  quiet hours + French holidays, one request + one reminder max, opt-out everywhere, Brevo/Twilio adapters,
+  delivery webhooks, attribution of reviews to requests.
+- Not built yet: AI replies with approval (phase 4), alerts + policy flagging workflow (6), Stripe + admin
+  health (7), PDF report (8), backups/Jenkins (9), local SEO module (10–12).
 
 ## 3. Verification at handoff
 
@@ -89,6 +97,8 @@ Open product questions are listed at the end of `TODO.md`.
 
 ## 7. Next step
 
-Start **phase 2 — client dashboard** on a new branch from `avisboost` (see `TODO.md` for the checklist).
-All data it needs is already in the schema and in the seed (`location_daily_stat`, `baseline_snapshot`,
-`link_event`, `review_request`, `competitor_snapshot`).
+Phase 4 (AI replies with Claude) and phase 6 (alerts + policy flagging) are the remaining pieces of the core
+product; phase 7 (Stripe + admin health) is needed before charging clients. See `TODO.md`.
+
+To go live with what exists today you need: a domain, `APP_SECRET`, `POSTGRES_PASSWORD`, a Brevo account
+(API key, authenticated sender domain, SMS sender name, webhook token) and printed stands.

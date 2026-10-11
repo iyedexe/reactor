@@ -7,7 +7,7 @@ shows how much the business has grown since joining. No client websites.
 
 Self-hosted with Docker Compose: **web** (Next.js) · **worker** (pg-boss jobs) · **postgres** · **caddy**.
 
-> Status: **phase 1 of 9** (foundation). See [Roadmap](#roadmap).
+> Status: phases **1, 2, 3 and 5** done (foundation, dashboard, smart links, e-mail/SMS requests). See [Roadmap](#roadmap).
 
 | Document | Purpose |
 |---|---|
@@ -22,7 +22,7 @@ Self-hosted with Docker Compose: **web** (Next.js) · **worker** (pg-boss jobs) 
 
 ```
            ┌─────────────── caddy (HTTPS, or :80 behind a Cloudflare Tunnel) ───────────────┐
-           │  everything ──► web (Next.js standalone)     /r/* ──► links (phase 3)         │
+           │  /r/* /m/* ──► links (Node + pg, cached)      everything else ──► web (Next.js)│
            └───────────────────────────────────────────────────────────────────────────────┘
   web ──┐                                       worker (pg-boss: syncs, replies, sends, reports)
         ├──► postgres  (app tables + "pgboss" schema for jobs) ◄──┘
@@ -32,7 +32,8 @@ Self-hosted with Docker Compose: **web** (Next.js) · **worker** (pg-boss jobs) 
 | Path | What it is |
 |---|---|
 | `apps/web` | Next.js 16 App Router UI + API routes, Better Auth, next-intl (fr default, en ready), shadcn/ui |
-| `apps/worker` | Background jobs and schedules (pg-boss), `/healthz`, bundled with esbuild |
+| `apps/worker` | Background jobs and schedules (pg-boss): review sync, rollups, competitors, request sending, attribution; `/healthz` |
+| `apps/links` | Public smart links `/r/{code}` (stands) and `/m/{token}` (e-mail/SMS): landing page, private feedback, event logging; tiny and cached |
 | `packages/db` | Prisma schema + migrations, **tenant-scoped data-access layer** (`forTenant`) |
 | `packages/core` | Pure logic and helpers: env config, JSON logger, normalization, templates, dates |
 | `packages/adapters` | Every external API behind an interface: Google Business Profile, Places, Claude, messaging, storage — each with a mock |
@@ -62,7 +63,7 @@ Each adapter has a mock so the platform runs end to end without any account. Swi
 | Google Business Profile (reviews, replies) | `mock_gbp_*` tables filled by the seed | GBP API v4 (needs Google approval) | `GOOGLE_MODE` |
 | Google Places (competitors) | `mock_place` table | Places API (New) | `PLACES_MODE` |
 | Claude (replies, classification) | deterministic French templates | phase 4 | `LLM_MODE` |
-| E-mail + SMS | logs to stdout | Brevo / Twilio (phase 5) | `MESSAGING_MODE` |
+| E-mail + SMS | logs to stdout | Brevo (e-mail + SMS), Twilio (SMS) | `MESSAGING_MODE`, `EMAIL_PROVIDER`, `SMS_PROVIDER` |
 | Stripe | phase 7 | phase 7 | `STRIPE_MODE` |
 | File storage | local volume | S3/MinIO (phase 8) | `STORAGE_DRIVER` |
 
@@ -78,7 +79,7 @@ docker compose -f docker-compose.dev.yml up -d    # Postgres (+ avisboost_test d
 pnpm install
 pnpm db:deploy && pnpm db:generate
 pnpm db:seed                      # wipes the DB and loads the demo businesses
-pnpm dev                          # web on :3000, worker health on :3001
+pnpm dev                          # web :3000, worker health :3001, links :3002 (proxied by web in dev)
 ```
 
 Demo logins (password `demo-avisboost`):
@@ -135,10 +136,10 @@ docker compose run --rm -e SEED_FORCE=1 worker node dist/seed.mjs
 ## Roadmap
 
 1. **Foundation** ✅ Docker, data model, auth, tenancy, mock Google adapter, seed data
-2. Client dashboard
-3. Smart links (`/r/{code}`) and landing page
+2. **Client dashboard** ✅ KPIs, impact since joining, charts, funnels, stands/campaigns, competitors, reviews list, feedback inbox
+3. **Smart links** ✅ `/r/{code}` landing page, private feedback, stand stock admin, QR sheets
 4. Automatic replies (Claude)
-5. E-mail/SMS review requests
+5. **E-mail/SMS review requests** ✅ contacts, CSV, booking webhook, consent/opt-out, quiet hours, Brevo/Twilio, attribution
 6. Alerts and policy-violation flagging
 7. Stripe billing and admin panel
 8. Monthly PDF report

@@ -40,6 +40,12 @@ export const envSchema = z.object({
   ANTHROPIC_MODEL_CLASSIFY: z.string().optional(),
 
   MESSAGING_MODE: z.enum(["console", "brevo", "twilio"]).default("console"),
+  /** Optional per-channel overrides of MESSAGING_MODE (e.g. e-mail via Brevo, SMS via Twilio). */
+  EMAIL_PROVIDER: z.enum(["console", "brevo"]).optional(),
+  SMS_PROVIDER: z.enum(["console", "brevo", "twilio"]).optional(),
+  BREVO_SMS_TYPE: z.enum(["transactional", "marketing"]).default("transactional"),
+  /** Shared secret in the Brevo webhook URL (?token=…). */
+  BREVO_WEBHOOK_TOKEN: z.string().optional(),
   EMAIL_FROM: z.string().default("AvisBoost <no-reply@example.com>"),
   BREVO_API_KEY: z.string().optional(),
   BREVO_SMS_SENDER: z.string().max(11).optional(),

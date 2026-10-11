@@ -5,7 +5,7 @@ import { hashPassword } from "better-auth/crypto";
 import type { Prisma } from "@avis/db";
 import type { RawPrisma } from "@avis/db/system";
 import { DAY, HOUR, keyedHash, googleWriteReviewUrl, detectTopics, DEFAULT_TEMPLATES, randomCode, randomToken } from "@avis/core";
-import { captureBaseline, rollupLocation } from "@avis/services";
+import { captureBaseline, rollupLocation, suppressionHash } from "@avis/services";
 import { ADMIN_DEFAULT_EMAIL, ADMIN_DEFAULT_PASSWORD, BUSINESSES, DEMO_PASSWORD, type BusinessDef, type LocationDef } from "./businesses.ts";
 import { FEEDBACK_MESSAGES, replyText, reviewText, VIOLATIONS } from "./content.ts";
 import { Rng } from "./rng.ts";
@@ -506,7 +506,7 @@ async function seedLocation(
     }
     const to = channel === "SMS" ? phone! : email!;
     const failed = !review && rng.chance(0.03);
-    const body = channel === "SMS" ? `Bonjour ${person.first}, merci pour votre visite chez ${biz.name} ! Votre avis nous aiderait beaucoup : https://avis.example/m/${token}\nSTOP au 36173` : `Bonjour ${person.first},\n\nMerci pour votre visite chez ${biz.name} ! Votre avis compte beaucoup pour nous.\nhttps://avis.example/m/${token}`;
+    const body = channel === "SMS" ? `Bonjour ${person.first}, merci pour votre visite chez ${biz.name} ! Votre avis nous aiderait beaucoup : ${process.env.LINKS_URL ?? process.env.APP_URL ?? "https://avis.example"}/m/${token}\nSTOP : ${process.env.LINKS_URL ?? process.env.APP_URL ?? "https://avis.example"}/u/${token}` : `Bonjour ${person.first},\n\nMerci pour votre visite chez ${biz.name} ! Votre avis compte beaucoup pour nous.\n${process.env.LINKS_URL ?? process.env.APP_URL ?? "https://avis.example"}/m/${token}`;
     messages.push({
       organizationId: orgId,
       channel,
@@ -524,7 +524,7 @@ async function seedLocation(
     });
     if (failed) {
       requests.push({ id: reqId, organizationId: orgId, locationId, contactId: id, campaignId: campaign.id, token, channel, visitAt, scheduledAt, status: "FAILED", sentAt: scheduledAt, createdAt: visitAt });
-      if (channel === "EMAIL") suppressions.push({ organizationId: orgId, channel, valueHash: keyedHash(to, ctx.secret, "suppression"), reason: "BOUNCE", createdAt: scheduledAt });
+      if (channel === "EMAIL") suppressions.push({ organizationId: orgId, channel, valueHash: suppressionHash(channel, to, ctx.secret), reason: "BOUNCE", createdAt: scheduledAt });
       return;
     }
 
@@ -532,7 +532,7 @@ async function seedLocation(
     if (!review && rng.chance(0.025)) {
       const at = new Date(scheduledAt.getTime() + rng.float(0.1, 5) * HOUR);
       consents.push({ organizationId: orgId, contactId: id, channel, action: "WITHDRAWN", source: channel === "SMS" ? "sms-stop" : "unsubscribe-link", createdAt: at });
-      suppressions.push({ organizationId: orgId, channel, valueHash: keyedHash(to, ctx.secret, "suppression"), reason: channel === "SMS" ? "STOP" : "UNSUBSCRIBE", createdAt: at });
+      suppressions.push({ organizationId: orgId, channel, valueHash: suppressionHash(channel, to, ctx.secret), reason: channel === "SMS" ? "STOP" : "UNSUBSCRIBE", createdAt: at });
       requests.push({ id: reqId, organizationId: orgId, locationId, contactId: id, campaignId: campaign.id, token, channel, visitAt, scheduledAt, status: "SENT", sentAt: scheduledAt, createdAt: visitAt });
       return;
     }
@@ -552,7 +552,7 @@ async function seedLocation(
     if (remindedAt && remindedAt > now) remindedAt = null;
     if (remindedAt) {
       messages.push({
-        organizationId: orgId, channel, kind: "REMINDER", to, body: `${person.first}, un petit mot sur votre visite chez ${biz.name} ? https://avis.example/m/${token}`,
+        organizationId: orgId, channel, kind: "REMINDER", to, body: `${person.first}, un petit mot sur votre visite chez ${biz.name} ? ${process.env.LINKS_URL ?? process.env.APP_URL ?? "https://avis.example"}/m/${token}`,
         provider: "brevo", providerMessageId: randomUUID(), status: "DELIVERED", reviewRequestId: reqId, sentAt: remindedAt, deliveredAt: new Date(remindedAt.getTime() + 15_000), createdAt: remindedAt,
       });
     }

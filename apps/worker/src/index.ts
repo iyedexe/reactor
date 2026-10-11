@@ -9,6 +9,8 @@ import {
   captureBaseline,
   createBoss,
   JOBS,
+  attributeAll,
+  dispatchDue,
   processNewReview,
   refreshCompetitors,
   rollupAll,
@@ -51,7 +53,7 @@ async function main() {
   const retry = { retryLimit: 5, retryDelay: 60, retryBackoff: true, retryDelayMax: 3600 };
   for (const name of Object.values(JOBS)) await boss.createQueue(name, retry);
 
-  const { google, llm, places } = adapters();
+  const { google, llm, places, messaging } = adapters();
 
   await boss.work<JobData["reviews.sync-all"]>(JOBS.syncAll, handler(JOBS.syncAll, async (data) => {
     const locations = await systemDb().location.findMany({
@@ -109,7 +111,13 @@ async function main() {
     refreshCompetitors(places, data.organizationId, data.locationId),
   ));
 
+  // Review requests: sends what is due (quiet hours, consent and opt-outs are re-checked inside).
+  await boss.work(JOBS.dispatchRequests, handler(JOBS.dispatchRequests, async () => dispatchDue(messaging)));
+  await boss.work(JOBS.attribution, handler(JOBS.attribution, async () => attributeAll()));
+
   // Schedules (stored in Postgres; safe to re-declare on every boot).
+  await boss.schedule(JOBS.dispatchRequests, "*/5 * * * *", {}, { tz: TZ, singletonKey: "dispatch" });
+  await boss.schedule(JOBS.attribution, "35 * * * *", {}, { tz: TZ });
   await boss.schedule(JOBS.competitorsAll, "20 4 * * 1", {}, { tz: TZ }); // Mondays 04:20
   await boss.schedule(JOBS.syncAll, "*/15 * * * *", {}, { tz: TZ, key: "incremental" });
   await boss.schedule(JOBS.syncAll, "10 3 * * *", { full: true }, { tz: TZ, key: "nightly-full" });

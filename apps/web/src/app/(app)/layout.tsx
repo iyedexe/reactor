@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Inbox, LayoutDashboard, MessageSquareText, Nfc } from "lucide-react";
+import { Inbox, LayoutDashboard, MessageSquareText, Nfc, Send, Users } from "lucide-react";
 import { AppShell } from "@/components/shell/app-shell";
 import { NavLink } from "@/components/shell/nav-link";
 import { getSession, isPlatformAdmin, requireTenant } from "@/server/session";
@@ -32,6 +32,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <NavLink href="/supports">
             <Nfc />
             {tn("stands")}
+          </NavLink>
+          <NavLink href="/campagnes">
+            <Send />
+            {tn("campaigns")}
+          </NavLink>
+          <NavLink href="/contacts">
+            <Users />
+            {tn("contacts")}
           </NavLink>
         </>
       }

@@ -5,7 +5,9 @@ import { MockGoogleBusinessAdapter } from "./google/mock.ts";
 import type { GoogleBusinessAdapter } from "./google/types.ts";
 import { MockLlmAdapter } from "./llm/mock.ts";
 import type { LlmAdapter } from "./llm/types.ts";
+import { BrevoMessagingAdapter } from "./messaging/brevo.ts";
 import { ConsoleMessagingAdapter } from "./messaging/console.ts";
+import { CompositeMessagingAdapter, parseFrom, TwilioSmsAdapter } from "./messaging/twilio.ts";
 import type { MessagingAdapter } from "./messaging/types.ts";
 import { LivePlacesAdapter } from "./places/live.ts";
 import { MockPlacesAdapter } from "./places/mock.ts";
@@ -17,6 +19,7 @@ export * from "./google/types.ts";
 export * from "./places/types.ts";
 export * from "./llm/types.ts";
 export * from "./messaging/types.ts";
+export { ConsoleMessagingAdapter } from "./messaging/console.ts";
 export * from "./storage/types.ts";
 
 export interface Adapters {
@@ -36,9 +39,27 @@ export function createAdapters(e: Env = env()): Adapters {
       : new MockGoogleBusinessAdapter();
   const places: PlacesAdapter = e.PLACES_MODE === "live" ? new LivePlacesAdapter(e.GOOGLE_PLACES_API_KEY) : new MockPlacesAdapter();
   const llm: LlmAdapter = new MockLlmAdapter(); // Claude adapter arrives in phase 4
-  const messaging: MessagingAdapter = new ConsoleMessagingAdapter(log); // Brevo/Twilio arrive in phase 5
+  const messaging = createMessaging(e, log);
   const storage: StorageAdapter = new LocalStorageAdapter(e.STORAGE_LOCAL_PATH); // S3 arrives in phase 8
   return { google, places, llm, messaging, storage };
+}
+
+function createMessaging(e: Env, log: ReturnType<typeof createLogger>): MessagingAdapter {
+  const consoleAdapter = new ConsoleMessagingAdapter(log);
+  const brevo = () => {
+    if (!e.BREVO_API_KEY) throw new Error("BREVO_API_KEY is required for the brevo provider");
+    return new BrevoMessagingAdapter({ apiKey: e.BREVO_API_KEY, from: parseFrom(e.EMAIL_FROM), smsSender: e.BREVO_SMS_SENDER, smsType: e.BREVO_SMS_TYPE });
+  };
+  const emailProvider = e.EMAIL_PROVIDER ?? (e.MESSAGING_MODE === "twilio" ? "console" : e.MESSAGING_MODE);
+  const smsProvider = e.SMS_PROVIDER ?? e.MESSAGING_MODE;
+  const email: MessagingAdapter = emailProvider === "brevo" ? brevo() : consoleAdapter;
+  let sms: Pick<MessagingAdapter, "sendSms"> & { provider: string } = consoleAdapter;
+  if (smsProvider === "brevo") sms = email.provider === "brevo" ? email : brevo();
+  if (smsProvider === "twilio") {
+    if (!e.TWILIO_ACCOUNT_SID || !e.TWILIO_AUTH_TOKEN || !e.TWILIO_FROM) throw new Error("TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_FROM are required");
+    sms = new TwilioSmsAdapter({ accountSid: e.TWILIO_ACCOUNT_SID, authToken: e.TWILIO_AUTH_TOKEN, from: e.TWILIO_FROM });
+  }
+  return email === sms ? email : new CompositeMessagingAdapter(email, sms);
 }
 
 let cached: Adapters | undefined;

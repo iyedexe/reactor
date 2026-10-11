@@ -8,3 +8,4 @@ export * from "./metrics/period.ts";
 export * from "./metrics/dashboard.ts";
 export * from "./competitors.ts";
 export * from "./stands.ts";
+export * from "./campaigns/index.ts";

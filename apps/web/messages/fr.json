@@ -45,7 +45,8 @@
     "reports": "Rapports",
     "settings": "Paramètres",
     "admin": "Administration",
-    "clients": "Clients"
+    "clients": "Clients",
+    "contacts": "Contacts"
   },
   "impersonation": {
     "banner": "Vous êtes connecté en tant que {name} (support).",
@@ -282,5 +283,147 @@
       "UNASSIGNED": "Non assigné"
     },
     "policy": "La page affichée propose toujours deux choix équivalents : laisser un avis Google ou envoyer un message privé. Google interdit de filtrer les avis selon la satisfaction du client."
+  },
+  "campaigns": {
+    "title": "Campagnes de demandes d'avis",
+    "subtitle": "Un SMS ou un e-mail envoyé après chaque visite, avec au plus une relance.",
+    "rules": "Règles appliquées automatiquement : tous les clients reçoivent le même message (pas de tri selon la satisfaction), aucune contrepartie, consentement obligatoire, désinscription dans chaque message, pas de SMS avant 9 h ni après 20 h, rien le dimanche ni les jours fériés, une demande et une relance maximum par client.",
+    "stats30": "30 derniers jours : {sent} envoyées · {clicked} ouvertes · {reviews} avis estimés",
+    "none": "Aucune campagne.",
+    "form": {
+      "name": "Nom",
+      "status": "Statut",
+      "statuses": {
+        "ACTIVE": "Active",
+        "PAUSED": "En pause"
+      },
+      "channels": "Canaux",
+      "channelsHint": "Le SMS est utilisé quand le client l'a accepté, sinon l'e-mail.",
+      "delay": "Délai après la visite (heures)",
+      "delayHint": "Ajusté automatiquement aux heures autorisées.",
+      "reminder": "Relance si pas de clic",
+      "reminderDays": "jours après l'envoi",
+      "save": "Enregistrer",
+      "saved": "Campagne enregistrée."
+    },
+    "templates": {
+      "title": "Messages",
+      "subtitle": "Personnalisez le texte de vos demandes. Les messages contraires aux règles de Google sont refusés.",
+      "custom": "Personnalisé",
+      "default": "Par défaut",
+      "subject": "Objet",
+      "body": "Message",
+      "variables": "Variables : {vars} (le lien est obligatoire). La mention de désinscription est ajoutée automatiquement.",
+      "preview": "Aperçu",
+      "save": "Enregistrer",
+      "saved": "Message enregistré.",
+      "reset": "Revenir au message par défaut",
+      "segments": "{length} caractères · {segments, plural, one {# SMS} other {# SMS}} ({encoding})",
+      "SMS": {
+        "REQUEST": "SMS – demande d'avis",
+        "REMINDER": "SMS – relance"
+      },
+      "EMAIL": {
+        "REQUEST": "E-mail – demande d'avis",
+        "REMINDER": "E-mail – relance"
+      }
+    },
+    "webhooks": {
+      "title": "Logiciel de réservation",
+      "subtitle": "Votre outil de réservation (Planity, Zenchef, TheFork…) peut nous envoyer chaque visite automatiquement.",
+      "lastUsed": "dernier appel le {date}",
+      "neverUsed": "jamais utilisé",
+      "delete": "Supprimer",
+      "tokenOnce": "Copiez ce jeton maintenant : il ne sera plus affiché.",
+      "namePlaceholder": "Nom (ex. Planity)",
+      "create": "Créer une connexion",
+      "payloadTitle": "Format attendu (JSON)"
+    }
+  },
+  "contacts": {
+    "title": "Clients",
+    "subtitle": "{count, plural, =0 {Aucun client} one {# client} other {# clients}}",
+    "search": "Rechercher (nom, e-mail, téléphone)",
+    "location": "Établissement",
+    "empty": "Aucun client.",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "pageOf": "Page {page} sur {pages}",
+    "add": {
+      "title": "Ajouter un client",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "phone": "Téléphone mobile",
+      "email": "E-mail",
+      "consent": "Consentement du client",
+      "consentSms": "Accepte de recevoir un SMS",
+      "consentEmail": "Accepte de recevoir un e-mail",
+      "evidence": "Preuve du consentement",
+      "defaultEvidence": "Accord donné en caisse",
+      "evidenceHint": "Comment l'accord a été recueilli (conservé pour le RGPD).",
+      "submit": "Ajouter et programmer la demande",
+      "result": {
+        "scheduled": "Client ajouté, demande programmée.",
+        "exists": "Client mis à jour (une demande existe déjà).",
+        "skipped": "Client ajouté, aucune demande ({reason}).",
+        "none": "Client ajouté."
+      }
+    },
+    "import": {
+      "title": "Importer un fichier CSV",
+      "file": "Fichier CSV",
+      "columns": "Colonnes reconnues : prenom, nom, telephone, email, date_visite, consentement_sms, consentement_email (oui/non).",
+      "consent": "Si le fichier n'a pas de colonne de consentement",
+      "consentSms": "Ces clients ont accepté les SMS",
+      "consentEmail": "Ces clients ont accepté les e-mails",
+      "evidencePlaceholder": "Comment l'accord a été recueilli (obligatoire)",
+      "submit": "Importer {file}",
+      "importing": "Import en cours…",
+      "report": "{total} lignes · {created} créés · {updated} mis à jour · {scheduled} demandes programmées",
+      "lineError": "Ligne {line} : {reason}"
+    },
+    "table": {
+      "name": "Client",
+      "contact": "Coordonnées",
+      "consent": "Consentement",
+      "request": "Demande d'avis",
+      "source": "Source"
+    },
+    "request": {
+      "none": "–",
+      "reviewed": "Avis publié ✓",
+      "scheduled": "Programmée le {date}",
+      "skipped": "Non envoyée ({reason})",
+      "SENT": "Envoyée",
+      "REMINDED": "Relancée",
+      "CLICKED": "Lien ouvert",
+      "FAILED": "Échec d'envoi",
+      "SCHEDULED": "Programmée",
+      "SKIPPED": "Non envoyée"
+    },
+    "skipReasons": {
+      "no_consent": "pas de consentement",
+      "opted_out": "désinscrit",
+      "service_suspended": "service suspendu",
+      "campaign_inactive": "campagne en pause",
+      "too_old": "visite trop ancienne",
+      "no_destination": "pas de coordonnée",
+      "reminder_disabled": "relance désactivée",
+      "send_error": "erreur d'envoi",
+      "other": "autre"
+    },
+    "sources": {
+      "MANUAL": "Saisie",
+      "CSV": "Import",
+      "WEBHOOK": "Réservation"
+    },
+    "actions": {
+      "optOutSms": "Désinscrire SMS",
+      "optOutEmail": "Désinscrire e-mail",
+      "optedOut": "Désinscription enregistrée.",
+      "delete": "Supprimer",
+      "confirmDelete": "Supprimer définitivement ce client et son historique ? Sa désinscription éventuelle restera respectée.",
+      "deleted": "Client supprimé."
+    }
   }
 }
