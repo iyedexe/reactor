@@ -1,0 +1,130 @@
+# AvisBoost — TODO
+
+Status legend: `[x]` done · `[ ]` to do · `(?)` needs a decision from the product owner.
+Phases follow the agreed build order. After each phase: summary + "what you need to configure".
+
+---
+
+## Phase 1 — Foundation ✅ (branch `avisboost`)
+
+- [x] pnpm monorepo (`apps/web`, `apps/worker`, `packages/{db,core,adapters,services,seed}`)
+- [x] Prisma 7 schema for the whole product, single `init` migration
+- [x] Tenant-scoped data access (`forTenant`) + isolation tests on every tenant model + ESLint boundaries
+- [x] Better Auth: email/password, magic links, platform admin, audited impersonation, sign-up disabled
+- [x] Login rate limiting keyed on the real client IP behind Caddy / Cloudflare Tunnel
+- [x] Adapters with mocks: Google Business Profile, Places, LLM, messaging (console), storage (local)
+- [x] Review sync (incremental + nightly full, deletion detection, external replies), daily rollups, baseline
+- [x] Worker: pg-boss queues + schedules, `/healthz`, graceful shutdown, mock review generator
+- [x] Seed: 3 businesses, 12 months of consistent history
+- [x] Dockerfile (web/worker/migrate, non-root), prod + dev compose, Caddy, `.env.example`
+- [x] CI workflow (GitHub Actions): typecheck, lint, unit, integration, e2e, image builds
+- [x] Playwright e2e smoke tests (login, tenant separation, admin, impersonation)
+
+## Phase 2 — Client dashboard
+
+- [ ] Location switcher (one location / all locations aggregated) kept in URL (`?lieu=`)
+- [ ] Date range picker (30 j, 90 j, 12 mois, personnalisé)
+- [ ] Metric functions in `packages/services/src/metrics/*` reading `location_daily_stat` (+ unit tests):
+  - [ ] current rating, total reviews, reviews this month — each with trend vs previous period
+  - [ ] rating over time, review count over time (Recharts)
+  - [ ] velocity (reviews/week): 12 weeks before joining vs since joining
+  - [ ] "Impact depuis votre arrivée": baseline vs now (rating, count, velocity, response rate)
+  - [ ] response rate and average response time
+  - [ ] star distribution; sentiment and topics (service, prix, attente…)
+  - [ ] funnels: stand scans → Google clicks → estimated reviews; messages sent → clicked → estimated reviews
+  - [ ] performance by stand and by campaign
+  - [ ] competitor benchmark (3–5 nearest, tracked over time) + weekly `competitors.refresh` job (Places)
+- [ ] Reviews list: filters (stars, answered/unanswered, date, location), reply drafts and statuses
+- [ ] Private feedback inbox (read/archive)
+- [ ] "Synchroniser maintenant" button (enqueue `reviews.sync`)
+- [ ] Empty states for a brand-new client (before first sync)
+- [ ] Load `dataviz` guidance before building charts; check light/dark
+- [ ] e2e: dashboard renders with seeded data for each demo business
+
+## Phase 3 — Smart links & landing page
+
+- [ ] `apps/links` service (plain Node + `pg`): `/r/{code}`, `/m/{token}`, `/f/{code}` feedback form, `/healthz`
+- [ ] In-memory cache of stand/location branding, refreshed via Postgres `LISTEN/NOTIFY`, serves stale if DB down
+- [ ] Batched async event logging (`link_event`), device/OS parsing, salted daily visitor hash
+- [ ] Landing page: business branding, **two equal options** ("Laisser un avis Google" / "Message privé au gérant"), no rating gate
+- [ ] Inactive/unassigned stand page (neutral, or redirect to sales page (?))
+- [ ] Admin: stand stock (create batch), assign/reassign/deactivate, printable QR sheet (SVG/PDF), NFC URL export (`?s=n` / `?s=q`)
+- [ ] Caddy routes `/r/* /m/* /f/*` → links; optional separate `LINKS_DOMAIN` site block
+- [ ] Load test of `/r/` (target p95 < 50 ms) + uptime monitor documented
+
+## Phase 4 — Automatic replies
+
+- [ ] Read the `claude-api` skill; Anthropic adapter (`LLM_MODE=anthropic`), model ids via env, prompt caching
+- [ ] Reply settings UI per location (tone, signature, always/never mention, auto-publish rules)
+- [ ] Pipeline in `processNewReview`: draft → guardrails → auto-publish (4–5★) or approval queue (1–3★)
+- [ ] Guardrails: no compensation offers / no "change your review", no personal data, never-mention list → force approval
+- [ ] Reply in reviewer's language
+- [ ] Approval queue + editor; publish via adapter; `reply_revision` history (who, when)
+- [ ] Respect `serviceState` (no publishing when suspended)
+- [ ] Tests: reply rules, guardrails, idempotent publish, mock adapter
+
+## Phase 5 — E-mail/SMS review requests
+
+- [ ] Contacts: manual add, CSV import (with consent column + evidence), booking webhook (`InboundWebhook`, bearer token)
+- [ ] Consent log + suppression list checked **at send time**; opt-out links (`List-Unsubscribe`, one-click) and SMS STOP handling
+- [ ] Templates editor with variables (`{{prenom}}`, `{{entreprise}}`, `{{lien_avis}}`), no incentive wording
+- [ ] Scheduler: delay after visit, quiet hours (SMS 9:00–20:00 Mon–Sat, nothing on Sunday, French public holidays (?)), 1 request + 1 reminder max
+- [ ] Brevo adapter (e-mail + SMS + delivery webhooks); Twilio adapter for SMS
+- [ ] Tracking: sent, delivered, clicked, attributed review (name match / time window)
+- [ ] Tests: consent/opt-out, quiet hours (DST!), max-one-reminder, attribution
+
+## Phase 6 — Alerts & policy flagging
+
+- [ ] Instant alert (e-mail/SMS per member prefs) for any review ≤ 3★
+- [ ] Classification UI: category, confidence, explanation
+- [ ] Violation reports for likely violations only: pre-filled reason, button to Google's official removal page, status tracking
+- [ ] Verify `GOOGLE_REVIEW_REMOVAL_URL` in `packages/core/src/google.ts` against current Google docs
+- [ ] Non-violating negative reviews: "strong public reply" suggestion instead of flagging; no bulk/automated submission
+- [ ] Private feedback alert to owner
+
+## Phase 7 — Billing & admin
+
+- [ ] Plans and limits (?) — Essentiel / Pro prices, setup fee, SMS quota, locations, competitors
+- [ ] Stripe adapter + Checkout (trial 1 month + setup fee) + Customer Portal + webhook (idempotent via `stripe_event`)
+- [ ] Cancellation: SUSPENDED (campaigns, replies, syncs stop) → TERMINATED after `BILLING_GRACE_DAYS` (stands deactivated)
+- [ ] Admin: client health (rating trend, unanswered reviews, campaign activity, billing), create client + invite owner, stands
+- [ ] Team settings: invite staff (own `invitation` table + magic link), roles owner/staff
+- [ ] Self-serve signup flow (?) (currently sign-up is disabled; admin creates clients)
+
+## Phase 8 — Monthly PDF report
+
+- [ ] Report template reusing dashboard components; Playwright (Chromium) in the worker image
+- [ ] Storage adapter: S3/MinIO driver; files in `stored_file`
+- [ ] Monthly schedule (1st, 07:00 Paris), per org and per location, e-mailed to owners with `monthlyReport` pref
+- [ ] Download from the dashboard
+
+## Phase 9 — Ops
+
+- [ ] `infra/backup/backup.sh`: nightly `pg_dump` (custom format) + storage volume, 30-day rotation, path configurable (NAS)
+- [ ] Documented, tested restore procedure
+- [ ] New Jenkinsfile (Linux agent with Docker): build → test → push/save images → deploy over SSH → migrate → health check
+- [ ] README: fresh Debian host, DNS, HTTPS, Cloudflare Tunnel vs public IP, backups, updates, rollback
+- [ ] Uptime Kuma (optional compose profile) monitoring `/r/` health, web, worker
+- [ ] Remove legacy Python files and old Jenkinsfile (needs owner confirmation)
+
+---
+
+## Tech debt & known limitations
+
+- [ ] Legacy files at the repo root (`reactor/`, `setup.py`, `requirements.txt`, `test_*.py`, old Windows `Jenkinsfile`) — deletion was blocked in the build session; remove when confirmed.
+- [ ] shadcn/ui components were written by hand (registry unreachable from the build sandbox). `components.json` is present; `npx shadcn add <component>` works on a normal machine.
+- [ ] `LiveGoogleBusinessAdapter` and `LivePlacesAdapter` are written against the documented APIs but **never called for real** (no credentials yet). Test them as soon as access is granted.
+- [ ] Better Auth rate-limit store is in memory: fine for a single `web` container; switch to `storage: "database"` (needs a `rateLimit` table) if `web` is ever scaled out.
+- [ ] Session `cookieCache` (5 min) means a banned/removed user keeps access up to 5 min.
+- [ ] Daily rollups exclude reviews later removed from Google (consistent with Google's current view, but history changes slightly after removals).
+- [ ] Seed is deterministic, but its dates are relative to "now": re-seed before a sales demo.
+- [ ] `proxy.ts` matcher already lists `/avis` and `/parametres` (future routes).
+- [ ] Worker image ~530 MB (Node slim base + Prisma); could shrink with a distroless base later.
+
+## Open questions for the product owner
+
+1. Plan prices/limits, setup fee amount, trial length confirmation (1 month).
+2. Grace period after cancellation (default 30 days) and what a deactivated stand shows.
+3. Domains: app (e.g. `app.avisboost.fr`) and short links (e.g. `avb.fr`).
+4. Jenkins: Linux agent with Docker available? Registry, or build on the server?
+5. French public holidays as "quiet days" for SMS/e-mail (recommended)?

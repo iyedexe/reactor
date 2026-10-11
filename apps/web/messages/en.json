@@ -23,6 +23,7 @@
     "magicSent": "If an account exists for {email}, a sign-in link has been sent.",
     "forgot": "Forgot your password?",
     "forgotSent": "If an account exists for {email}, a reset email has been sent.",
+    "tooMany": "Too many attempts. Wait a few seconds and try again.",
     "invalid": "Incorrect email or password.",
     "noOrganization": "Your account is not linked to any business. Please contact support.",
     "signOut": "Sign out",

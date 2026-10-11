@@ -59,7 +59,16 @@ export const auth = betterAuth({
       },
     },
   },
-  rateLimit: { enabled: e.NODE_ENV === "production", storage: "memory" },
+  // Sign-in/sign-up are limited to 3 attempts per 10 s per client IP in production.
+  rateLimit: { enabled: e.AUTH_RATE_LIMIT ?? e.NODE_ENV === "production", storage: "memory" },
+  advanced: {
+    ipAddress: {
+      // Requests arrive through Caddy (and possibly cloudflared). Trusting private ranges lets Better Auth
+      // skip those hops in X-Forwarded-For and rate-limit per real client instead of one shared bucket.
+      // Caddy only keeps an incoming X-Forwarded-For from trusted (private) peers, so clients cannot spoof it.
+      trustedProxies: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8", "::1/128", "fc00::/7"],
+    },
+  },
   plugins: [
     magicLink({
       disableSignUp: true,

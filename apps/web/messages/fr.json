@@ -23,6 +23,7 @@
     "magicSent": "Si un compte existe pour {email}, un lien de connexion vient d'être envoyé.",
     "forgot": "Mot de passe oublié ?",
     "forgotSent": "Si un compte existe pour {email}, un e-mail de réinitialisation vient d'être envoyé.",
+    "tooMany": "Trop de tentatives. Patientez quelques secondes puis réessayez.",
     "invalid": "E-mail ou mot de passe incorrect.",
     "noOrganization": "Votre compte n'est rattaché à aucun établissement. Contactez le support.",
     "signOut": "Se déconnecter",

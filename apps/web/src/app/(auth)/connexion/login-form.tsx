@@ -24,7 +24,7 @@ export function LoginForm() {
     const { error } = await authClient.signIn.email({ email, password });
     setPending(false);
     if (error) {
-      toast.error(t("invalid"));
+      toast.error(error.status === 429 ? t("tooMany") : t("invalid"));
       return;
     }
     router.replace("/tableau-de-bord");

@@ -18,7 +18,9 @@
     "db:migrate": "pnpm --filter @avis/db migrate:dev",
     "db:deploy": "pnpm --filter @avis/db migrate:deploy",
     "db:seed": "pnpm --filter @avis/seed seed",
-    "db:reset": "pnpm --filter @avis/db reset && pnpm db:seed"
+    "db:reset": "pnpm --filter @avis/db reset && pnpm db:seed",
+    "test:e2e": "playwright test",
+    "check": "pnpm typecheck && pnpm lint && pnpm test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

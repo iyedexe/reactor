@@ -21,6 +21,11 @@ export const envSchema = z.object({
   APP_SECRET: z.string().min(32),
   /** First platform admin, promoted automatically on first sign-in / by the seed. */
   ADMIN_EMAIL: z.email().optional(),
+  /** Login rate limiting (3 attempts / 10 s / IP). Defaults to on in production; CI end-to-end runs turn it off. */
+  AUTH_RATE_LIMIT: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true")),
 
   GOOGLE_MODE: z.enum(["mock", "live"]).default("mock"),
   GOOGLE_CLIENT_ID: z.string().optional(),

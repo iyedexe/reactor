@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main, avisboost]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  DATABASE_URL: postgresql://avis:avis@localhost:5432/avisboost
+  TEST_DATABASE_URL: postgresql://avis:avis@localhost:5432/avisboost_test
+  APP_SECRET: ci-secret-ci-secret-ci-secret-ci-secret-1234
+  APP_URL: http://localhost:3000
+  NEXT_TELEMETRY_DISABLED: "1"
+  # e2e signs in several times within seconds; production keeps login rate limiting on.
+  AUTH_RATE_LIMIT: "false"
+
+jobs:
+  checks:
+    name: Typecheck, lint, unit & integration tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: avis
+          POSTGRES_PASSWORD: avis
+          POSTGRES_DB: avisboost_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U avis" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint (includes tenancy import boundaries)
+        run: pnpm lint
+      - name: Unit tests
+        run: pnpm test:unit
+      - name: Integration tests (tenant isolation, review sync)
+        run: pnpm test:integration
+
+  e2e:
+    name: End-to-end smoke tests
+    runs-on: ubuntu-latest
+    needs: checks
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: avis
+          POSTGRES_PASSWORD: avis
+          POSTGRES_DB: avisboost
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U avis" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm db:deploy
+      - run: pnpm db:seed
+      - name: Build web (standalone, as in production)
+        run: |
+          pnpm --filter @avis/web build
+          cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
+          cp -r apps/web/public apps/web/.next/standalone/apps/web/public
+      - name: Start web
+        run: |
+          node apps/web/.next/standalone/apps/web/server.js > web.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health && break; sleep 2; done
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: |
+            playwright-report
+            test-results
+            web.log
+
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+    needs: checks
+    strategy:
+      matrix:
+        target: [web, worker, migrate]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: ${{ matrix.target }}
+          push: false
+          tags: avisboost/${{ matrix.target }}:ci
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}

@@ -8,6 +8,13 @@ Self-hosted with Docker Compose: **web** (Next.js) · **worker** (pg-boss jobs) 
 
 > Status: **phase 1 of 9** (foundation). See [Roadmap](#roadmap).
 
+| Document | Purpose |
+|---|---|
+| [`HANDOFF.md`](HANDOFF.md) | Current state, verification, decisions, gotchas, what the owner must provide |
+| [`TODO.md`](TODO.md) | Detailed checklist for every phase, tech debt, open questions |
+| [`docs/WORKFLOW.md`](docs/WORKFLOW.md) | Day-to-day development workflow, DB changes, adapters, jobs, testing |
+| [`CLAUDE.md`](CLAUDE.md) | Rules for AI coding agents working on this repo |
+
 ---
 
 ## Architecture
@@ -88,11 +95,17 @@ Magic links and other e-mails are printed in the dev server log while `MESSAGING
 ### Tests and checks
 
 ```bash
-pnpm typecheck
-pnpm lint
+pnpm check                # typecheck + lint + unit + integration
 pnpm test:unit
 pnpm test:integration     # needs Postgres; uses TEST_DATABASE_URL (default …/avisboost_test)
+pnpm test:e2e             # Playwright; needs a running seeded app (E2E_BASE_URL, default http://localhost:3000)
 ```
+
+First Playwright run on a new machine: `pnpm exec playwright install chromium`.
+
+CI (GitHub Actions, `.github/workflows/ci.yml`) runs typecheck, lint, unit and integration tests against a
+Postgres service, the e2e suite against a production build, and builds the three Docker images.
+Deployment automation (Jenkins over SSH) comes in phase 9.
 
 ---
 
