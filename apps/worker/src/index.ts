@@ -10,6 +10,7 @@ import {
   createBoss,
   JOBS,
   processNewReview,
+  refreshCompetitors,
   rollupAll,
   rollupLocation,
   syncLocationReviews,
@@ -50,7 +51,7 @@ async function main() {
   const retry = { retryLimit: 5, retryDelay: 60, retryBackoff: true, retryDelayMax: 3600 };
   for (const name of Object.values(JOBS)) await boss.createQueue(name, retry);
 
-  const { google, llm } = adapters();
+  const { google, llm, places } = adapters();
 
   await boss.work<JobData["reviews.sync-all"]>(JOBS.syncAll, handler(JOBS.syncAll, async (data) => {
     const locations = await systemDb().location.findMany({
@@ -93,7 +94,23 @@ async function main() {
 
   await boss.work(JOBS.mockGenerateReviews, handler(JOBS.mockGenerateReviews, async () => ({ created: await generateMockReviews() })));
 
+  await boss.work(JOBS.competitorsAll, handler(JOBS.competitorsAll, async () => {
+    const locations = await systemDb().location.findMany({
+      where: { status: "ACTIVE", organization: { serviceState: "ACTIVE" } },
+      select: { id: true, organizationId: true },
+    });
+    for (const l of locations) {
+      await boss.send(JOBS.competitorsLocation, { organizationId: l.organizationId, locationId: l.id }, { singletonKey: l.id });
+    }
+    return { locations: locations.length };
+  }));
+
+  await boss.work<JobData["competitors.refresh"]>(JOBS.competitorsLocation, handler(JOBS.competitorsLocation, async (data) =>
+    refreshCompetitors(places, data.organizationId, data.locationId),
+  ));
+
   // Schedules (stored in Postgres; safe to re-declare on every boot).
+  await boss.schedule(JOBS.competitorsAll, "20 4 * * 1", {}, { tz: TZ }); // Mondays 04:20
   await boss.schedule(JOBS.syncAll, "*/15 * * * *", {}, { tz: TZ, key: "incremental" });
   await boss.schedule(JOBS.syncAll, "10 3 * * *", { full: true }, { tz: TZ, key: "nightly-full" });
   await boss.schedule(JOBS.rollupAll, "40 3 * * *", { days: 3 }, { tz: TZ });

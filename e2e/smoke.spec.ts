@@ -25,8 +25,8 @@ test("an owner sees only their own business", async ({ page }) => {
   await signIn(page, "sophie@lepetitzinc.demo");
   await expect(page).toHaveURL(/\/tableau-de-bord/);
   await expect(page.locator("h1")).toHaveText("Bonjour Sophie");
-  await expect(page.getByText("Le Petit Zinc – Presqu'île")).toBeVisible();
-  await expect(page.getByText("Le Petit Zinc – Brotteaux")).toBeVisible();
+  const options = page.getByLabel("Établissement").locator("option");
+  await expect(options).toHaveText(["Tous les établissements", "Le Petit Zinc – Brotteaux", "Le Petit Zinc – Presqu'île"]);
   await expect(page.getByText("Atelier Margaux")).toHaveCount(0);
   await expect(page.getByText("Garage Dumont")).toHaveCount(0);
 });

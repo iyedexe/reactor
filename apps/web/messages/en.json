@@ -8,7 +8,10 @@
     "allLocations": "All locations",
     "error": "Something went wrong. Please try again.",
     "language": "Language",
-    "languages": { "fr": "Français", "en": "English" }
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    }
   },
   "auth": {
     "title": "Sign in",
@@ -51,12 +54,100 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Hello {name}",
-    "currentRating": "Current rating",
-    "totalReviews": "Total reviews",
-    "locations": "Locations",
-    "syncedAt": "Last sync: {date}",
-    "neverSynced": "Never synced",
-    "phaseNote": "The full dashboard arrives in phase 2."
+    "syncedAt": "Reviews synced on {date}",
+    "neverSynced": "Not synced yet",
+    "syncNow": "Sync now",
+    "syncQueued": "Sync started, new reviews will appear shortly.",
+    "syncFailed": "Could not start the sync.",
+    "vsPrevious": "vs previous period",
+    "vsLastMonth": "vs same day last month",
+    "inPeriod": "in period",
+    "empty": "No data for this period yet.",
+    "kpi": {
+      "rating": "Google rating",
+      "totalReviews": "Total reviews",
+      "thisMonth": "Reviews this month",
+      "reviewsInPeriod": "Reviews in period",
+      "responseRate": "Response rate",
+      "responseTime": "Average response time"
+    },
+    "impact": {
+      "title": "Your progress since joining",
+      "subtitle": "Compared with your situation on {date}",
+      "multiplier": "{x}× more reviews per week",
+      "rating": "Rating",
+      "reviews": "Reviews",
+      "velocity": "Reviews per week",
+      "perWeek": "/ wk",
+      "responseRate": "Response rate",
+      "responseTime": "Response time",
+      "to": "becomes"
+    },
+    "charts": {
+      "reviewsTitle": "New reviews",
+      "ratingTitle": "Rating over time",
+      "ratingHint": "Average of all your Google reviews",
+      "distributionTitle": "Star distribution",
+      "topicsTitle": "Topics mentioned",
+      "topicsHint": "Mentions in positive (4–5★) and negative (1–2★) reviews",
+      "competitorsTitle": "Rating vs competitors",
+      "newReviews": "New reviews",
+      "avgStars": "Average stars",
+      "rating": "Rating",
+      "totalReviews": "Total reviews",
+      "joined": "Joined AvisBoost",
+      "positive": "Positive",
+      "neutral": "Neutral",
+      "negative": "Negative",
+      "inPeriodCount": "{count, plural, one {# review} other {# reviews}} in the period",
+      "per": {
+        "day": "Per day",
+        "week": "Per week",
+        "month": "Per month"
+      }
+    },
+    "funnel": {
+      "standsTitle": "NFC / QR stands",
+      "messagesTitle": "E-mail / SMS requests",
+      "scans": "Scans and taps",
+      "googleClicks": "“Leave a Google review” clicks",
+      "estimatedReviews": "Reviews obtained (estimate)",
+      "sent": "Requests sent",
+      "clicked": "Links opened",
+      "feedbacks": "{count, plural, =0 {No private message} one {# private message} other {# private messages}} received via stands.",
+      "estimatedHint": "Reviews are attributed by estimation (time window and name)."
+    },
+    "stands": {
+      "title": "Performance by stand",
+      "stand": "Stand",
+      "scans": "Scans",
+      "clicks": "Google clicks",
+      "reviews": "Est. reviews",
+      "conversion": "Conversion",
+      "none": "No stands installed."
+    },
+    "campaigns": {
+      "title": "Performance by campaign",
+      "campaign": "Campaign",
+      "sent": "Sent",
+      "clicked": "Opened",
+      "reviews": "Est. reviews",
+      "conversion": "Conversion",
+      "none": "No campaigns."
+    },
+    "competitors": {
+      "title": "You and your competitors",
+      "hint": "The nearest businesses in the same category, tracked weekly.",
+      "pickLocation": "Pick a location to see the comparison over time.",
+      "business": "Business",
+      "rating": "Rating",
+      "reviews": "Reviews",
+      "newReviews": "New reviews (period)",
+      "distance": "Distance",
+      "you": "You"
+    },
+    "estimatedFootnote": "“Estimated” figures match clicks with reviews posted shortly after; Google does not reveal where a review came from.",
+    "seeReviews": "See all reviews"
   },
   "admin": {
     "title": "Clients",
@@ -68,7 +159,11 @@
     "service": "Service",
     "since": "Client since"
   },
-  "serviceState": { "ACTIVE": "Active", "SUSPENDED": "Suspended", "TERMINATED": "Terminated" },
+  "serviceState": {
+    "ACTIVE": "Active",
+    "SUSPENDED": "Suspended",
+    "TERMINATED": "Terminated"
+  },
   "subscriptionStatus": {
     "TRIALING": "Trial",
     "ACTIVE": "Active",
@@ -76,5 +171,95 @@
     "UNPAID": "Unpaid",
     "CANCELED": "Canceled",
     "INCOMPLETE": "Incomplete"
+  },
+  "filters": {
+    "location": "Location",
+    "allLocations": "All locations",
+    "period": "Period",
+    "periods": {
+      "30j": "30 days",
+      "90j": "90 days",
+      "12m": "12 months",
+      "tout": "All time"
+    }
+  },
+  "topics": {
+    "service": "Service",
+    "quality": "Quality",
+    "price": "Price",
+    "waiting_time": "Waiting / speed",
+    "cleanliness": "Cleanliness",
+    "welcome": "Welcome",
+    "ambiance": "Atmosphere",
+    "expertise": "Advice / expertise"
+  },
+  "reviews": {
+    "title": "Google reviews",
+    "count": "{count, plural, =0 {No reviews} one {# review} other {# reviews}}",
+    "empty": "No reviews match these filters.",
+    "noComment": "Rating without a comment.",
+    "filters": {
+      "location": "Location",
+      "allLocations": "All locations",
+      "stars": "Rating",
+      "allStars": "All ratings",
+      "negative": "1 to 3 ★",
+      "state": "State",
+      "allStates": "All states",
+      "unanswered": "Unanswered",
+      "pending": "Reply to approve",
+      "answered": "Answered",
+      "period": "Period",
+      "allTime": "All time",
+      "d7": "Last 7 days",
+      "d30": "Last 30 days",
+      "d90": "Last 90 days",
+      "m12": "Last 12 months"
+    },
+    "state": {
+      "answered": "Answered",
+      "pending": "Reply to approve",
+      "drafted": "Reply scheduled",
+      "unanswered": "Unanswered"
+    },
+    "reply": {
+      "published": "Reply published on {date}",
+      "draft": "Draft reply (approval and publishing arrive in phase 4)"
+    },
+    "policy": {
+      "NONE": "Compliant",
+      "SPAM_FAKE": "Spam / fake",
+      "OFF_TOPIC": "Off-topic",
+      "CONFLICT_OF_INTEREST": "Conflict of interest",
+      "OFFENSIVE": "Offensive",
+      "HARASSMENT": "Harassment",
+      "PERSONAL_INFO": "Personal information",
+      "IMPERSONATION": "Impersonation",
+      "explanation": "AI analysis ({confidence}% confidence):"
+    },
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}"
+  },
+  "feedback": {
+    "title": "Private feedback",
+    "subtitle": "{count, plural, =0 {No new messages} one {# new message} other {# new messages}}",
+    "explain": "Messages sent by your customers through the “Private message” button on your stands. They are not published on Google.",
+    "location": "Location",
+    "allLocations": "All locations",
+    "status": "Status",
+    "inbox": "Inbox",
+    "onlyNew": "New only",
+    "archived": "Archived",
+    "empty": "No messages.",
+    "new": "New",
+    "viaStand": "via “{label}”",
+    "wantsReply": "{name} would like a reply:",
+    "markRead": "Mark as read",
+    "archive": "Archive",
+    "restore": "Restore",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}"
   }
 }

@@ -8,7 +8,10 @@
     "allLocations": "Tous les établissements",
     "error": "Une erreur est survenue. Réessayez dans un instant.",
     "language": "Langue",
-    "languages": { "fr": "Français", "en": "English" }
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    }
   },
   "auth": {
     "title": "Connexion",
@@ -51,12 +54,100 @@
   "dashboard": {
     "title": "Tableau de bord",
     "welcome": "Bonjour {name}",
-    "currentRating": "Note actuelle",
-    "totalReviews": "Avis au total",
-    "locations": "Établissements",
-    "syncedAt": "Dernière synchronisation : {date}",
-    "neverSynced": "Jamais synchronisé",
-    "phaseNote": "Le tableau de bord complet arrive à l'étape 2."
+    "syncedAt": "Avis synchronisés le {date}",
+    "neverSynced": "Pas encore synchronisé",
+    "syncNow": "Synchroniser",
+    "syncQueued": "Synchronisation lancée, les nouveaux avis arrivent dans quelques instants.",
+    "syncFailed": "Impossible de lancer la synchronisation.",
+    "vsPrevious": "vs période précédente",
+    "vsLastMonth": "vs même date le mois dernier",
+    "inPeriod": "sur la période",
+    "empty": "Pas encore de données sur cette période.",
+    "kpi": {
+      "rating": "Note Google",
+      "totalReviews": "Avis au total",
+      "thisMonth": "Avis ce mois-ci",
+      "reviewsInPeriod": "Avis sur la période",
+      "responseRate": "Taux de réponse",
+      "responseTime": "Délai moyen de réponse"
+    },
+    "impact": {
+      "title": "Votre progression depuis votre arrivée",
+      "subtitle": "Comparé à votre situation au {date}",
+      "multiplier": "{x}× plus d'avis par semaine",
+      "rating": "Note",
+      "reviews": "Nombre d'avis",
+      "velocity": "Avis par semaine",
+      "perWeek": "/ sem.",
+      "responseRate": "Taux de réponse",
+      "responseTime": "Délai de réponse",
+      "to": "devient"
+    },
+    "charts": {
+      "reviewsTitle": "Nouveaux avis",
+      "ratingTitle": "Évolution de la note",
+      "ratingHint": "Note moyenne de tous vos avis Google",
+      "distributionTitle": "Répartition des notes",
+      "topicsTitle": "Sujets mentionnés",
+      "topicsHint": "Mentions dans les avis positifs (4–5★) et négatifs (1–2★)",
+      "competitorsTitle": "Note comparée aux concurrents",
+      "newReviews": "Nouveaux avis",
+      "avgStars": "Note moyenne",
+      "rating": "Note",
+      "totalReviews": "Avis au total",
+      "joined": "Arrivée AvisBoost",
+      "positive": "Positif",
+      "neutral": "Neutre",
+      "negative": "Négatif",
+      "inPeriodCount": "{count, plural, one {# avis} other {# avis}} sur la période",
+      "per": {
+        "day": "Par jour",
+        "week": "Par semaine",
+        "month": "Par mois"
+      }
+    },
+    "funnel": {
+      "standsTitle": "Supports NFC / QR",
+      "messagesTitle": "Demandes par e-mail / SMS",
+      "scans": "Scans et passages de téléphone",
+      "googleClicks": "Clics « Laisser un avis Google »",
+      "estimatedReviews": "Avis obtenus (estimation)",
+      "sent": "Demandes envoyées",
+      "clicked": "Liens ouverts",
+      "feedbacks": "{count, plural, =0 {Aucun message privé} one {# message privé reçu} other {# messages privés reçus}} via les supports.",
+      "estimatedHint": "Les avis sont attribués par estimation (fenêtre de temps et nom)."
+    },
+    "stands": {
+      "title": "Performance par support",
+      "stand": "Support",
+      "scans": "Scans",
+      "clicks": "Clics Google",
+      "reviews": "Avis estimés",
+      "conversion": "Conversion",
+      "none": "Aucun support installé."
+    },
+    "campaigns": {
+      "title": "Performance par campagne",
+      "campaign": "Campagne",
+      "sent": "Envoyées",
+      "clicked": "Ouvertes",
+      "reviews": "Avis estimés",
+      "conversion": "Conversion",
+      "none": "Aucune campagne."
+    },
+    "competitors": {
+      "title": "Vous et vos concurrents",
+      "hint": "Les établissements les plus proches de la même catégorie, suivis chaque semaine.",
+      "pickLocation": "Choisissez un établissement pour voir l'évolution comparée.",
+      "business": "Établissement",
+      "rating": "Note",
+      "reviews": "Avis",
+      "newReviews": "Nouveaux avis (période)",
+      "distance": "Distance",
+      "you": "Vous"
+    },
+    "estimatedFootnote": "Les chiffres « estimés » rapprochent les clics et les avis publiés peu après ; Google ne communique pas la source d'un avis.",
+    "seeReviews": "Voir tous les avis"
   },
   "admin": {
     "title": "Clients",
@@ -68,7 +159,11 @@
     "service": "Service",
     "since": "Client depuis"
   },
-  "serviceState": { "ACTIVE": "Actif", "SUSPENDED": "Suspendu", "TERMINATED": "Résilié" },
+  "serviceState": {
+    "ACTIVE": "Actif",
+    "SUSPENDED": "Suspendu",
+    "TERMINATED": "Résilié"
+  },
   "subscriptionStatus": {
     "TRIALING": "Essai",
     "ACTIVE": "Actif",
@@ -76,5 +171,95 @@
     "UNPAID": "Impayé",
     "CANCELED": "Résilié",
     "INCOMPLETE": "Incomplet"
+  },
+  "filters": {
+    "location": "Établissement",
+    "allLocations": "Tous les établissements",
+    "period": "Période",
+    "periods": {
+      "30j": "30 jours",
+      "90j": "90 jours",
+      "12m": "12 mois",
+      "tout": "Tout"
+    }
+  },
+  "topics": {
+    "service": "Service",
+    "quality": "Qualité",
+    "price": "Prix",
+    "waiting_time": "Attente / rapidité",
+    "cleanliness": "Propreté",
+    "welcome": "Accueil",
+    "ambiance": "Ambiance",
+    "expertise": "Conseil / expertise"
+  },
+  "reviews": {
+    "title": "Avis Google",
+    "count": "{count, plural, =0 {Aucun avis} one {# avis} other {# avis}}",
+    "empty": "Aucun avis ne correspond à ces filtres.",
+    "noComment": "Note sans commentaire.",
+    "filters": {
+      "location": "Établissement",
+      "allLocations": "Tous les établissements",
+      "stars": "Note",
+      "allStars": "Toutes les notes",
+      "negative": "1 à 3 ★",
+      "state": "État",
+      "allStates": "Tous les états",
+      "unanswered": "Sans réponse",
+      "pending": "Réponse à valider",
+      "answered": "Répondus",
+      "period": "Période",
+      "allTime": "Toute la période",
+      "d7": "7 derniers jours",
+      "d30": "30 derniers jours",
+      "d90": "90 derniers jours",
+      "m12": "12 derniers mois"
+    },
+    "state": {
+      "answered": "Répondu",
+      "pending": "Réponse à valider",
+      "drafted": "Réponse programmée",
+      "unanswered": "Sans réponse"
+    },
+    "reply": {
+      "published": "Réponse publiée le {date}",
+      "draft": "Brouillon de réponse (validation et publication à l'étape 4)"
+    },
+    "policy": {
+      "NONE": "Conforme",
+      "SPAM_FAKE": "Spam / faux avis",
+      "OFF_TOPIC": "Hors sujet",
+      "CONFLICT_OF_INTEREST": "Conflit d'intérêts",
+      "OFFENSIVE": "Contenu injurieux",
+      "HARASSMENT": "Harcèlement",
+      "PERSONAL_INFO": "Données personnelles",
+      "IMPERSONATION": "Usurpation d'identité",
+      "explanation": "Analyse IA (confiance {confidence} %) :"
+    },
+    "prev": "Précédent",
+    "next": "Suivant",
+    "pageOf": "Page {page} sur {pages}"
+  },
+  "feedback": {
+    "title": "Messages privés",
+    "subtitle": "{count, plural, =0 {Aucun nouveau message} one {# nouveau message} other {# nouveaux messages}}",
+    "explain": "Messages envoyés par vos clients via le bouton « Message privé » de vos supports. Ils ne sont pas publiés sur Google.",
+    "location": "Établissement",
+    "allLocations": "Tous les établissements",
+    "status": "Statut",
+    "inbox": "Boîte de réception",
+    "onlyNew": "Nouveaux uniquement",
+    "archived": "Archivés",
+    "empty": "Aucun message.",
+    "new": "Nouveau",
+    "viaStand": "via « {label} »",
+    "wantsReply": "{name} souhaite une réponse :",
+    "markRead": "Marquer comme lu",
+    "archive": "Archiver",
+    "restore": "Restaurer",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "pageOf": "Page {page} sur {pages}"
   }
 }

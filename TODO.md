@@ -23,26 +23,26 @@ Phases follow the agreed build order. After each phase: summary + "what you need
 - [x] CI workflow (GitHub Actions): typecheck, lint, unit, integration, e2e, image builds
 - [x] Playwright e2e smoke tests (login, tenant separation, admin, impersonation)
 
-## Phase 2 — Client dashboard
+## Phase 2 — Client dashboard ✅
 
-- [ ] Location switcher (one location / all locations aggregated) kept in URL (`?lieu=`)
-- [ ] Date range picker (30 j, 90 j, 12 mois, personnalisé)
-- [ ] Metric functions in `packages/services/src/metrics/*` reading `location_daily_stat` (+ unit tests):
-  - [ ] current rating, total reviews, reviews this month — each with trend vs previous period
-  - [ ] rating over time, review count over time (Recharts)
-  - [ ] velocity (reviews/week): 12 weeks before joining vs since joining
-  - [ ] "Impact depuis votre arrivée": baseline vs now (rating, count, velocity, response rate)
-  - [ ] response rate and average response time
-  - [ ] star distribution; sentiment and topics (service, prix, attente…)
-  - [ ] funnels: stand scans → Google clicks → estimated reviews; messages sent → clicked → estimated reviews
-  - [ ] performance by stand and by campaign
-  - [ ] competitor benchmark (3–5 nearest, tracked over time) + weekly `competitors.refresh` job (Places)
-- [ ] Reviews list: filters (stars, answered/unanswered, date, location), reply drafts and statuses
-- [ ] Private feedback inbox (read/archive)
-- [ ] "Synchroniser maintenant" button (enqueue `reviews.sync`)
-- [ ] Empty states for a brand-new client (before first sync)
-- [ ] Load `dataviz` guidance before building charts; check light/dark
-- [ ] e2e: dashboard renders with seeded data for each demo business
+- [x] Location switcher (one location / all locations aggregated) kept in URL (`?lieu=`)
+- [x] Period picker (30 j, 90 j, 12 mois, tout) — custom date range not done
+- [x] Metric functions in `packages/services/src/metrics/*` reading `location_daily_stat` (+ unit tests):
+  - [x] current rating, total reviews, reviews this month — each with trend vs previous period
+  - [x] rating over time, review count over time (Recharts)
+  - [x] velocity (reviews/week): 12 weeks before joining vs since joining
+  - [x] "Impact depuis votre arrivée": baseline vs now (rating, count, velocity, response rate)
+  - [x] response rate and average response time
+  - [x] star distribution; sentiment and topics (service, prix, attente…)
+  - [x] funnels: stand scans → Google clicks → estimated reviews; messages sent → clicked → estimated reviews
+  - [x] performance by stand and by campaign
+  - [x] competitor benchmark (3–5 nearest, tracked over time) + weekly `competitors.refresh` job (Places)
+- [x] Reviews list: filters (stars, answered/unanswered, date, location), reply drafts and statuses
+- [x] Private feedback inbox (read/archive)
+- [x] "Synchroniser maintenant" button (enqueue `reviews.sync`)
+- [x] Empty states: KPIs show "–", impact hidden until the baseline exists
+- [x] Charts use the validated dataviz palette (light + dark tokens); app has no dark-mode toggle yet
+- [x] e2e: dashboard renders with seeded data for each demo business
 
 ## Phase 3 — Smart links & landing page
 

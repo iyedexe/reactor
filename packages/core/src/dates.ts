@@ -22,3 +22,15 @@ export function addDays(d: Date, days: number): Date {
 export const HOUR = 3_600_000;
 export const DAY = 86_400_000;
 export const WEEK = 7 * DAY;
+
+/** The instant a local day starts, e.g. "2026-03-29" in Europe/Paris → 2026-03-28T23:00:00Z. */
+export function startOfLocalDay(key: string, tz = DEFAULT_TZ): Date {
+  const [y, m, d] = key.split("-").map(Number) as [number, number, number];
+  return new Date(new TZDate(y, m - 1, d, 0, 0, 0, tz).getTime());
+}
+
+/** Instant range [start, end) covering local days `fromKey`..`toKey` inclusive. */
+export function localDayRange(fromKey: string, toKey: string, tz = DEFAULT_TZ): { gte: Date; lt: Date } {
+  const end = dateFromKey(toKey);
+  return { gte: startOfLocalDay(fromKey, tz), lt: startOfLocalDay(addDays(end, 1).toISOString().slice(0, 10), tz) };
+}

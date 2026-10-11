@@ -8,6 +8,8 @@ export const JOBS = {
   rollupAll: "stats.rollup-all",
   rollupLocation: "stats.rollup-location",
   mockGenerateReviews: "mock.generate-reviews",
+  competitorsAll: "competitors.refresh-all",
+  competitorsLocation: "competitors.refresh",
 } as const;
 
 export interface JobData {
@@ -17,6 +19,8 @@ export interface JobData {
   [JOBS.rollupAll]: { days?: number };
   [JOBS.rollupLocation]: { locationId: string; days?: number };
   [JOBS.mockGenerateReviews]: Record<string, never>;
+  [JOBS.competitorsAll]: Record<string, never>;
+  [JOBS.competitorsLocation]: { organizationId: string; locationId: string };
 }
 
 export type JobName = (typeof JOBS)[keyof typeof JOBS];
