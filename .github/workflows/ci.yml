@@ -81,10 +81,12 @@ jobs:
           pnpm --filter @avis/web build
           cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
           cp -r apps/web/public apps/web/.next/standalone/apps/web/public
-      - name: Start web
+      - name: Start web and links
         run: |
+          pnpm --filter @avis/links build
           node apps/web/.next/standalone/apps/web/server.js > web.log 2>&1 &
-          for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health && break; sleep 2; done
+          PORT=3002 node apps/links/dist/index.mjs > links.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health && curl -sf http://localhost:3002/healthz && break; sleep 2; done
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - if: failure()
@@ -95,6 +97,7 @@ jobs:
             playwright-report
             test-results
             web.log
+            links.log
 
   docker:
     name: Docker images build
@@ -102,7 +105,7 @@ jobs:
     needs: checks
     strategy:
       matrix:
-        target: [web, worker, migrate]
+        target: [web, worker, links, migrate]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3

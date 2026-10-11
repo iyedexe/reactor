@@ -2,6 +2,7 @@
 # Multi-target build for the AvisBoost platform.
 #   docker build --target web     -t avisboost/web .
 #   docker build --target worker  -t avisboost/worker .
+#   docker build --target links   -t avisboost/links .
 #   docker build --target migrate -t avisboost/migrate .
 # All runtime images run as the unprivileged "node" user.
 
@@ -21,6 +22,7 @@ FROM base AS deps
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/web/package.json apps/web/
 COPY apps/worker/package.json apps/worker/
+COPY apps/links/package.json apps/links/
 COPY packages/core/package.json packages/core/
 COPY packages/db/package.json packages/db/
 COPY packages/adapters/package.json packages/adapters/
@@ -37,9 +39,13 @@ RUN DATABASE_URL=postgresql://build:build@localhost:5432/build \
     APP_SECRET=build-time-placeholder-secret-not-used-at-runtime \
     pnpm --filter @avis/web build
 RUN pnpm --filter @avis/worker build
+RUN pnpm --filter @avis/links build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm --filter @avis/worker deploy --prod --legacy /out/worker \
  && cp -r apps/worker/dist /out/worker/dist
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm --filter @avis/links deploy --prod --legacy /out/links \
+ && cp -r apps/links/dist /out/links/dist
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm --filter @avis/db deploy --legacy /out/db \
  && cp -r packages/db/prisma packages/db/prisma.config.ts /out/db/
@@ -68,6 +74,17 @@ USER node
 EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", "--enable-source-maps", "dist/index.mjs"]
+
+# ── links: public /r/{code} and /m/{token} (tiny, fast, cached) ─────────────
+FROM node:${NODE_VERSION}-bookworm-slim AS links
+ENV NODE_ENV=production PORT=3002
+WORKDIR /app
+COPY --from=build --chown=node:node /out/links ./
+USER node
+EXPOSE 3002
+HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3002/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node", "--enable-source-maps", "dist/index.mjs"]
 
 # ── migrate: one-shot `prisma migrate deploy` ───────────────────────────────

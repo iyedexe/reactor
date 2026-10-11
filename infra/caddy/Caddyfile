@@ -6,21 +6,43 @@
 	}
 }
 
-{$SITE_ADDRESS} {
+(common) {
 	encode zstd gzip
-
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		-Server
 	}
-
-	reverse_proxy web:3000 {
-		health_uri /api/health
-		health_interval 30s
-	}
-
 	log {
 		output stdout
 		format json
+	}
+}
+
+{$SITE_ADDRESS} {
+	import common
+
+	# Smart links go to the dedicated links service.
+	@links path /r/* /m/*
+	handle @links {
+		reverse_proxy links:3002
+	}
+
+	handle {
+		reverse_proxy web:3000 {
+			health_uri /api/health
+			health_interval 30s
+		}
+	}
+}
+
+# Optional short links domain (LINKS_SITE_ADDRESS, e.g. avb.fr). Everything else redirects to the app.
+{$LINKS_SITE_ADDRESS} {
+	import common
+	@links path /r/* /m/*
+	handle @links {
+		reverse_proxy links:3002
+	}
+	handle {
+		respond "Not found" 404
 	}
 }

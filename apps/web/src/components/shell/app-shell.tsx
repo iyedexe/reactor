@@ -21,7 +21,7 @@ export async function AppShell(props: ShellProps) {
     <div className="flex min-h-screen flex-col">
       {props.impersonating && <ImpersonationBanner name={props.user.name} />}
       <div className="flex flex-1">
-        <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar md:flex">
+        <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar md:flex print:hidden">
           <Link href="/" className="flex h-14 items-center gap-2 border-b px-5 font-semibold">
             <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <Star className="size-4 fill-current" />
@@ -44,11 +44,11 @@ export async function AppShell(props: ShellProps) {
           </nav>
         </aside>
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:px-6">
+          <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:px-6 print:hidden">
             <div className="truncate text-sm font-medium text-muted-foreground">{props.organization?.name}</div>
             <UserMenu {...props.user} organizationId={props.organization?.id} memberships={props.memberships} />
           </header>
-          <main className="flex-1 p-4 md:p-6">{props.children}</main>
+          <main className="flex-1 p-4 md:p-6 print:p-0">{props.children}</main>
         </div>
       </div>
     </div>

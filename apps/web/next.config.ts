@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pg", "pino", "@prisma/adapter-pg"],
   poweredByHeader: false,
   typedRoutes: false,
+  // In development the links service runs separately (pnpm dev, port 3002); in production Caddy routes /r/ and /m/.
+  async rewrites() {
+    if (process.env.NODE_ENV === "production") return [];
+    const target = process.env.LINKS_DEV_URL ?? "http://localhost:3002";
+    return [
+      { source: "/r/:path*", destination: `${target}/r/:path*` },
+      { source: "/m/:path*", destination: `${target}/m/:path*` },
+    ];
+  },
   async headers() {
     return [
       {

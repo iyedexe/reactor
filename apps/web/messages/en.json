@@ -261,5 +261,26 @@
     "prev": "Previous",
     "next": "Next",
     "pageOf": "Page {page} of {pages}"
+  },
+  "stands": {
+    "title": "NFC / QR stands",
+    "subtitle": "Your stands: customers tap their phone or scan the QR code to leave a review.",
+    "label": "Stand",
+    "location": "Location",
+    "status": "Status",
+    "scans30": "Scans (30 d)",
+    "clicks30": "Google clicks (30 d)",
+    "actions": "Actions",
+    "preview": "Open page",
+    "downloadQr": "QR code",
+    "rename": "Rename",
+    "save": "Save",
+    "none": "No stands installed yet. Contact us to receive some.",
+    "statusValues": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Deactivated",
+      "UNASSIGNED": "Unassigned"
+    },
+    "policy": "The page always offers two equivalent choices: leave a Google review or send a private message. Google forbids filtering reviews by customer satisfaction."
   }
 }

@@ -1,0 +1,17 @@
+import { chromium } from "@playwright/test";
+const [,, email, path, out, w = "1440"] = process.argv;
+const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const page = await b.newPage({ viewport: { width: Number(w), height: 900 } });
+const errs = [];
+page.on("pageerror", (e) => errs.push(e.message));
+page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
+await page.goto("http://localhost:3000/connexion");
+await page.fill("#email", email);
+await page.fill("#password", email.startsWith("admin") ? "admin-avisboost" : "demo-avisboost");
+await page.click("button[type=submit]");
+await page.waitForURL(/tableau-de-bord|admin/);
+await page.goto("http://localhost:3000" + path, { waitUntil: "networkidle" });
+await page.waitForTimeout(1500);
+await page.screenshot({ path: out, fullPage: true });
+console.log("errors:", errs.slice(0, 5));
+await b.close();

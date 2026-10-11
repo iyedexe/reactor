@@ -261,5 +261,26 @@
     "prev": "Précédent",
     "next": "Suivant",
     "pageOf": "Page {page} sur {pages}"
+  },
+  "stands": {
+    "title": "Supports NFC / QR",
+    "subtitle": "Vos présentoirs : vos clients approchent leur téléphone ou scannent le QR code pour laisser un avis.",
+    "label": "Support",
+    "location": "Établissement",
+    "status": "Statut",
+    "scans30": "Scans (30 j)",
+    "clicks30": "Clics Google (30 j)",
+    "actions": "Actions",
+    "preview": "Voir la page",
+    "downloadQr": "QR code",
+    "rename": "Renommer",
+    "save": "Enregistrer",
+    "none": "Aucun support n'est encore installé. Contactez-nous pour en recevoir.",
+    "statusValues": {
+      "ACTIVE": "Actif",
+      "INACTIVE": "Désactivé",
+      "UNASSIGNED": "Non assigné"
+    },
+    "policy": "La page affichée propose toujours deux choix équivalents : laisser un avis Google ou envoyer un message privé. Google interdit de filtrer les avis selon la satisfaction du client."
   }
 }

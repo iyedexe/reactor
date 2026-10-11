@@ -1,0 +1,22 @@
+{
+  "name": "@avis/links",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
+    "build": "node build.mjs",
+    "start": "node dist/index.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@avis/core": "workspace:*",
+    "@types/pg": "^8.23.1",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15"
+  },
+  "dependencies": {
+    "pg": "^8.23.1",
+    "pino": "^10.4.0"
+  }
+}

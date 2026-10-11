@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Users } from "lucide-react";
+import { Nfc, Users } from "lucide-react";
 import { AppShell } from "@/components/shell/app-shell";
 import { NavLink } from "@/components/shell/nav-link";
 import { requirePlatformAdmin } from "@/server/session";
@@ -13,10 +13,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       organization={{ id: "", name: t("admin") }}
       isAdmin={false}
       nav={
-        <NavLink href="/admin">
-          <Users />
-          {t("clients")}
-        </NavLink>
+        <>
+          <NavLink href="/admin" exact>
+            <Users />
+            {t("clients")}
+          </NavLink>
+          <NavLink href="/admin/supports">
+            <Nfc />
+            {t("stands")}
+          </NavLink>
+        </>
       }
     >
       {children}

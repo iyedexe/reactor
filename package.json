@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter @avis/web --filter @avis/worker dev",
+    "dev": "pnpm --parallel --filter @avis/web --filter @avis/worker --filter @avis/links dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",

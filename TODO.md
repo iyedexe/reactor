@@ -44,16 +44,21 @@ Phases follow the agreed build order. After each phase: summary + "what you need
 - [x] Charts use the validated dataviz palette (light + dark tokens); app has no dark-mode toggle yet
 - [x] e2e: dashboard renders with seeded data for each demo business
 
-## Phase 3 — Smart links & landing page
+## Phase 3 — Smart links & landing page ✅
 
-- [ ] `apps/links` service (plain Node + `pg`): `/r/{code}`, `/m/{token}`, `/f/{code}` feedback form, `/healthz`
-- [ ] In-memory cache of stand/location branding, refreshed via Postgres `LISTEN/NOTIFY`, serves stale if DB down
-- [ ] Batched async event logging (`link_event`), device/OS parsing, salted daily visitor hash
-- [ ] Landing page: business branding, **two equal options** ("Laisser un avis Google" / "Message privé au gérant"), no rating gate
-- [ ] Inactive/unassigned stand page (neutral, or redirect to sales page (?))
-- [ ] Admin: stand stock (create batch), assign/reassign/deactivate, printable QR sheet (SVG/PDF), NFC URL export (`?s=n` / `?s=q`)
-- [ ] Caddy routes `/r/* /m/* /f/*` → links; optional separate `LINKS_DOMAIN` site block
-- [ ] Load test of `/r/` (target p95 < 50 ms) + uptime monitor documented
+- [x] `apps/links` service (plain Node + `pg`): `/r/{code}`, `/r/{code}/google`, `/r/{code}/message`, `/m/{token}`, `/healthz`
+- [x] In-memory cache of stands + branding, invalidated instantly via Postgres `LISTEN/NOTIFY` triggers, serves stale data if the DB is down
+- [x] Batched async event logging (`link_event`), device/OS parsing, salted daily visitor hash, link-preview bots ignored
+- [x] Landing page: business branding, **two equal options** (same style and size, tested), no rating gate, no cookies, no JS
+- [x] Private feedback form: validation, honeypot, per-visitor rate limit; "Leave a Google review" still offered after sending
+- [x] E-mail/SMS links (`/m/{token}`) mark the request as clicked once
+- [x] Inactive/unassigned/terminated stands: neutral page, or `LINKS_INACTIVE_REDIRECT_URL`
+- [x] Admin: stand stock (create batch), assign/reassign/deactivate/back to stock (audited), printable QR sheet (SVG, A4), CSV export of NFC URLs (`?s=n` / `?s=q`)
+- [x] Client page "Supports": stats, rename, QR download
+- [x] Caddy routes `/r/* /m/*` → links; optional `LINKS_SITE_ADDRESS` short domain; Docker target + compose service
+- [x] Load test: ~2,350 req/s, p95 36 ms, p99 56 ms at 50 concurrent (bundled build, dev machine)
+- [ ] Uptime monitor setup documented (phase 9)
+- [ ] Location logo on the landing page (initials for now; needs logo upload, phase 8 storage)
 
 ## Phase 4 — Automatic replies
 
