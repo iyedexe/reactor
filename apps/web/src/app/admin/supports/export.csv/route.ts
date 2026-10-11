@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       return [s.code, s.status, s.location?.organization.name, s.location?.name, s.label, u.nfc, u.qr].map(cell).join(";");
     }),
   ];
-  return new Response(`﻿${lines.join("\r\n")}\r\n`, {
+  return new Response(`\uFEFF${lines.join("\r\n")}\r\n`, {
     headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="supports-avisboost.csv"` },
   });
 }
