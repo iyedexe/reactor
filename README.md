@@ -1,8 +1,9 @@
 # AvisBoost
 
-Google review growth platform for local businesses in France (restaurants, salons, garages, clinics):
-NFC/QR review stands, review requests by e-mail/SMS, AI replies to reviews, policy-violation flagging,
-and a client dashboard that shows how much the business has grown since joining.
+Reputation and local-visibility (notoriété) platform for local businesses in France (restaurants, salons,
+barbers, garages, clinics): NFC/QR review stands, review requests by e-mail/SMS, AI replies to reviews,
+policy-violation flagging, Google listing optimisation and local rank tracking, and a client dashboard that
+shows how much the business has grown since joining. No client websites.
 
 Self-hosted with Docker Compose: **web** (Next.js) · **worker** (pg-boss jobs) · **postgres** · **caddy**.
 
@@ -142,6 +143,11 @@ docker compose run --rm -e SEED_FORCE=1 worker node dist/seed.mjs
 7. Stripe billing and admin panel
 8. Monthly PDF report
 9. Backups, Jenkins pipeline, deployment docs
+10. Google listing audit & optimisation (local SEO)
+11. Google posts
+12. Local rank tracking & visibility report
+
+Scope: Google reviews + Google listing visibility. Client websites are out of scope.
 
 > The Python files at the repository root (`reactor/`, `setup.py`, `requirements.txt`, `test_*.py`) and the current
 > `Jenkinsfile` belong to an older project and are not used by AvisBoost; the Jenkinsfile is replaced in phase 9.

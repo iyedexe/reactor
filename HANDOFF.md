@@ -8,7 +8,8 @@ _Last updated: 2026-10-11 · End of phase 1 of 9_
 |---|---|
 | Repository | `github.com/iyedexe/reactor` |
 | Branch | `avisboost` (phase 1). `master` still holds the old Python project and is untouched. |
-| Status | Phase 1 (foundation) complete and verified. Phases 2–9 not started. |
+| Status | Phase 1 (foundation) complete and verified. Phases 2–12 not started. |
+| Scope | Google reviews + Google listing visibility (local SEO). **No client websites.** |
 | Plan & checklists | [`TODO.md`](TODO.md) |
 | How to work on it | [`docs/WORKFLOW.md`](docs/WORKFLOW.md) |
 | Setup / run / deploy | [`README.md`](README.md) |
@@ -82,6 +83,7 @@ No pull request has been opened yet. Merge `avisboost` into `master` (or open a 
 | Phase 5 | Brevo account (API key, verified sender domain, SMS sender name) |
 | Phase 7 | Stripe account, products/prices, plan limits, setup fee, grace period |
 | Phase 9 | NAS path for backups, Jenkins Linux agent with Docker, SSH access to the server |
+| Phases 10–12 | GBP API approval (listing edits, posts); choice and budget of a rank-tracking provider |
 
 Open product questions are listed at the end of `TODO.md`.
 

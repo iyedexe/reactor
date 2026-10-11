@@ -3,6 +3,9 @@
 Status legend: `[x]` done · `[ ]` to do · `(?)` needs a decision from the product owner.
 Phases follow the agreed build order. After each phase: summary + "what you need to configure".
 
+**Product scope:** a reputation and local-visibility (notoriété) service built on **Google reviews** and the
+**Google Business Profile listing**. **Out of scope: client websites** (no site builder or hosting).
+
 ---
 
 ## Phase 1 — Foundation ✅ (branch `avisboost`)
@@ -107,6 +110,40 @@ Phases follow the agreed build order. After each phase: summary + "what you need
 - [ ] Uptime Kuma (optional compose profile) monitoring `/r/` health, web, worker
 - [ ] Remove legacy Python files and old Jenkinsfile (needs owner confirmation)
 
+## Phases 10–12 — Local SEO / notoriété module (no website)
+
+Google ranks local results on **relevance**, **distance** and **prominence**. Distance can't be changed;
+these phases work on relevance (listing content) and prominence (reviews, activity, consistency).
+Never promise "#1": results depend on where the person searches from.
+
+### Phase 10 — Google listing audit & optimisation
+- [ ] Read the full listing through the GBP adapter (mock first): categories, services/prices, hours (incl. special
+      hours/holidays), description, attributes, photos (count, freshness), booking link
+- [ ] Completeness score per location with prioritized recommendations
+      (e.g. "add category 'Barbier'", "5 photos older than 6 months", "no special hours for 25 December")
+- [ ] One-click apply of simple fixes via the API (owner approves; audit log of every change)
+- [ ] Guardrails: no keywords stuffed into the business name, no fake addresses (Google guidelines)
+- [ ] Score history in the dashboard and monthly report
+
+### Phase 11 — Google posts (listing activity)
+- [ ] AI-drafted posts (offer, news, photo of the week) in the business's tone, owner approval required
+- [ ] Scheduling (e.g. one per week) and publishing via the GBP adapter; history and statuses
+- [ ] Reminder when no post or photo was published for N days
+
+### Phase 12 — Local rank tracking & visibility report
+- [ ] Per location: tracked searches (e.g. "barbier Lyon 2", "coiffeur homme Bellecour"), 3–10 per plan
+- [ ] Rank adapter with mock; real provider (?) — Places Text Search approximation vs a paid local-SERP API
+      (Google has no official Maps-position API; cost per check must be priced into the plan)
+- [ ] Grid of points around the business (e.g. 5×5 over 2 km), weekly checks, heat map + trend
+- [ ] Comparison with the tracked competitors (reuses phase 2 competitors)
+- [ ] Citation consistency checklist: same name/address/phone on PagesJaunes, Apple Plans, Bing, Facebook,
+      booking tools (manual tracker, no automated submissions)
+- [ ] "Visibilité" section in the dashboard and monthly PDF
+
+### Offer structure (?)
+- **Essentiel** — stands + review requests + AI replies + alerts + dashboard
+- **Visibilité** — Essentiel + listing audit/optimisation + Google posts + rank tracking
+
 ---
 
 ## Tech debt & known limitations
@@ -128,3 +165,5 @@ Phases follow the agreed build order. After each phase: summary + "what you need
 3. Domains: app (e.g. `app.avisboost.fr`) and short links (e.g. `avb.fr`).
 4. Jenkins: Linux agent with Docker available? Registry, or build on the server?
 5. French public holidays as "quiet days" for SMS/e-mail (recommended)?
+6. Rank tracking provider: free approximation (Places API) or a paid local-SERP API? Searches per plan?
+7. Pricing of the "Visibilité" tier vs "Essentiel".
